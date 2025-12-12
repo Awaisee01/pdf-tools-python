@@ -1,13 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const dropzone = document.getElementById('dropzone');
+    const dropzone = document.getElementById('dropzone') || document.querySelector('.upload-zone');
     const fileInput = document.getElementById('fileInput');
     const browseBtn = document.getElementById('browseBtn');
     const fileList = document.getElementById('fileList');
     const selectedFiles = document.getElementById('selectedFiles');
-    const toolOptions = document.getElementById('toolOptions');
     const uploadForm = document.getElementById('uploadForm');
     const processBtn = document.getElementById('processBtn');
-    const uploadArea = document.getElementById('uploadArea');
     const resultArea = document.getElementById('resultArea');
     const errorArea = document.getElementById('errorArea');
     const downloadButtons = document.getElementById('downloadButtons');
@@ -15,36 +13,46 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorMessage = document.getElementById('errorMessage');
     const processAnother = document.getElementById('processAnother');
     const tryAgain = document.getElementById('tryAgain');
+    const toolColumns = document.querySelector('.tool-columns');
     
     let files = [];
 
-    browseBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        fileInput.click();
-    });
+    if (browseBtn) {
+        browseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (fileInput) fileInput.click();
+        });
+    }
 
-    dropzone.addEventListener('click', function() {
-        fileInput.click();
-    });
+    if (dropzone) {
+        dropzone.addEventListener('click', function(e) {
+            if (e.target !== browseBtn && !browseBtn.contains(e.target)) {
+                if (fileInput) fileInput.click();
+            }
+        });
 
-    dropzone.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        dropzone.classList.add('dragover');
-    });
+        dropzone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
 
-    dropzone.addEventListener('dragleave', function() {
-        dropzone.classList.remove('dragover');
-    });
+        dropzone.addEventListener('dragleave', function() {
+            dropzone.classList.remove('dragover');
+        });
 
-    dropzone.addEventListener('drop', function(e) {
-        e.preventDefault();
-        dropzone.classList.remove('dragover');
-        handleFiles(e.dataTransfer.files);
-    });
+        dropzone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+    }
 
-    fileInput.addEventListener('change', function() {
-        handleFiles(this.files);
-    });
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            handleFiles(this.files);
+        });
+    }
 
     function handleFiles(newFiles) {
         files = Array.from(newFiles);
@@ -52,14 +60,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateFileList() {
+        if (!fileList || !selectedFiles) return;
+        
         if (files.length === 0) {
             fileList.style.display = 'none';
-            toolOptions.style.display = 'none';
             return;
         }
 
         fileList.style.display = 'block';
-        toolOptions.style.display = 'block';
         selectedFiles.innerHTML = '';
 
         files.forEach((file, index) => {
@@ -84,7 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         document.querySelectorAll('.remove-file').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
                 const index = parseInt(this.dataset.index);
                 files.splice(index, 1);
                 updateFileList();
@@ -92,76 +101,77 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const splitType = document.getElementById('splitType');
-    const pagesGroup = document.getElementById('pagesGroup');
-    if (splitType && pagesGroup) {
-        splitType.addEventListener('change', function() {
-            pagesGroup.style.display = this.value === 'range' ? 'block' : 'none';
+    if (uploadForm) {
+        uploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (files.length === 0) {
+                alert('Please select at least one file');
+                return;
+            }
+
+            const formData = new FormData();
+            files.forEach(file => {
+                formData.append('files', file);
+            });
+
+            const inputs = uploadForm.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.name && input.name !== 'files' && input.type !== 'file') {
+                    if (input.type === 'radio') {
+                        if (input.checked) {
+                            formData.append(input.name, input.value);
+                        }
+                    } else {
+                        formData.append(input.name, input.value);
+                    }
+                }
+            });
+
+            const btnText = processBtn ? processBtn.querySelector('.btn-text') : null;
+            const btnLoading = processBtn ? processBtn.querySelector('.btn-loading') : null;
+            
+            if (btnText) btnText.style.display = 'none';
+            if (btnLoading) btnLoading.style.display = 'inline-flex';
+            if (processBtn) processBtn.disabled = true;
+
+            showLoading('Processing your file...');
+
+            try {
+                const response = await fetch(`/process/${toolName}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                hideLoading();
+
+                if (result.success) {
+                    showResult(result);
+                } else {
+                    showError(result.error || 'Processing failed');
+                }
+            } catch (error) {
+                hideLoading();
+                showError('An error occurred while processing your file');
+            } finally {
+                if (btnText) btnText.style.display = 'inline';
+                if (btnLoading) btnLoading.style.display = 'none';
+                if (processBtn) processBtn.disabled = false;
+            }
         });
     }
 
-    uploadForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-
-        if (files.length === 0) {
-            alert('Please select at least one file');
-            return;
-        }
-
-        const formData = new FormData();
-        files.forEach(file => {
-            formData.append('files', file);
-        });
-
-        const inputs = uploadForm.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            if (input.name && input.name !== 'files' && input.type !== 'file') {
-                formData.append(input.name, input.value);
-            }
-        });
-
-        const btnText = processBtn.querySelector('.btn-text');
-        const btnLoading = processBtn.querySelector('.btn-loading');
-        btnText.style.display = 'none';
-        btnLoading.style.display = 'inline-flex';
-        processBtn.disabled = true;
-
-        showLoading('Processing your file...');
-
-        try {
-            const response = await fetch(`/process/${toolName}`, {
-                method: 'POST',
-                body: formData
-            });
-
-            const result = await response.json();
-
-            hideLoading();
-
-            if (result.success) {
-                showResult(result);
-            } else {
-                showError(result.error || 'Processing failed');
-            }
-        } catch (error) {
-            hideLoading();
-            showError('An error occurred while processing your file');
-        } finally {
-            btnText.style.display = 'inline';
-            btnLoading.style.display = 'none';
-            processBtn.disabled = false;
-        }
-    });
-
     function showResult(result) {
-        uploadArea.style.display = 'none';
-        errorArea.style.display = 'none';
-        resultArea.style.display = 'block';
+        if (toolColumns) toolColumns.style.display = 'none';
+        if (errorArea) errorArea.style.display = 'none';
+        if (resultArea) resultArea.style.display = 'block';
 
-        downloadButtons.innerHTML = '';
+        if (downloadButtons) downloadButtons.innerHTML = '';
 
         if (result.is_folder) {
-            resultMessage.textContent = `Successfully processed! ${result.files ? result.files.length : ''} files created.`;
+            if (resultMessage) resultMessage.textContent = `Successfully processed! ${result.files ? result.files.length : ''} files created.`;
             const downloadBtn = document.createElement('a');
             downloadBtn.href = `/download-folder/${result.output_folder}`;
             downloadBtn.className = 'btn btn-download';
@@ -173,13 +183,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 </svg>
                 Download All (ZIP)
             `;
-            downloadButtons.appendChild(downloadBtn);
+            if (downloadButtons) downloadButtons.appendChild(downloadBtn);
         } else {
             let msg = 'Your file has been processed successfully.';
             if (result.reduction !== undefined) {
                 msg = `File compressed by ${result.reduction}%! Original: ${formatFileSize(result.original_size)}, New: ${formatFileSize(result.new_size)}`;
             }
-            resultMessage.textContent = msg;
+            if (resultMessage) resultMessage.textContent = msg;
 
             const downloadBtn = document.createElement('a');
             downloadBtn.href = `/download/${result.filename}`;
@@ -192,28 +202,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 </svg>
                 Download File
             `;
-            downloadButtons.appendChild(downloadBtn);
+            if (downloadButtons) downloadButtons.appendChild(downloadBtn);
         }
     }
 
     function showError(message) {
-        uploadArea.style.display = 'none';
-        resultArea.style.display = 'none';
-        errorArea.style.display = 'block';
-        errorMessage.textContent = message;
+        if (toolColumns) toolColumns.style.display = 'none';
+        if (resultArea) resultArea.style.display = 'none';
+        if (errorArea) errorArea.style.display = 'block';
+        if (errorMessage) errorMessage.textContent = message;
     }
 
     function resetForm() {
         files = [];
-        fileInput.value = '';
+        if (fileInput) fileInput.value = '';
         updateFileList();
-        uploadArea.style.display = 'block';
-        resultArea.style.display = 'none';
-        errorArea.style.display = 'none';
+        if (toolColumns) toolColumns.style.display = 'grid';
+        if (resultArea) resultArea.style.display = 'none';
+        if (errorArea) errorArea.style.display = 'none';
     }
 
-    processAnother.addEventListener('click', resetForm);
-    tryAgain.addEventListener('click', resetForm);
+    if (processAnother) processAnother.addEventListener('click', resetForm);
+    if (tryAgain) tryAgain.addEventListener('click', resetForm);
 
     function formatFileSize(bytes) {
         if (bytes === 0) return '0 Bytes';
