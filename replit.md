@@ -25,7 +25,7 @@ This is a fully functional PDF tool website with 20+ tools for manipulating, con
 - **Protect PDF**: Add password protection
 - **Sign PDF**: Add signature to PDF
 - **Watermark PDF**: Add watermark to PDF
-- **Edit PDF**: Add text to PDF
+- **Edit PDF**: Add text, select & edit existing text, add images, signatures, shapes
 
 ## Tech Stack
 - **Backend**: Python Flask
