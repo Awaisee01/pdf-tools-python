@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}PDF Tools - Free Online PDF Editor{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <h1>Every PDF tool you need</h1>
+        <p>All-in-one PDF toolkit to edit, convert, merge, split, and transform your PDF files. 100% free, secure, and processed locally.</p>
+    </div>
+</section>
+
+<section class="tools-section">
+    <div class="container">
+        <div class="tools-grid">
+            {% for tool in tools %}
+            <a href="{{ tool.url }}" class="tool-card" style="--tool-color: {{ tool.color }}">
+                <div class="tool-icon">
+                    {% include "icons/" + tool.icon + ".svg" ignore missing %}
+                    {% if not tool.icon %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    {% endif %}
+                </div>
+                <h3>{{ tool.name }}</h3>
+                <p>{{ tool.description }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container">
+        <div class="features-grid">
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <h3>Secure Processing</h3>
+                <p>All files are processed locally and automatically deleted after completion.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <h3>Fast Processing</h3>
+                <p>Get your converted files in seconds with our optimized processing engine.</p>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                </div>
+                <h3>Easy Download</h3>
+                <p>Download your processed files instantly with a single click.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
