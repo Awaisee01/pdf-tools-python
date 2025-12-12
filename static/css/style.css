@@ -2568,6 +2568,51 @@ input[type="range"]::-webkit-slider-thumb {
     box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3);
 }
 
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 20px;
+    padding-left: 20px;
+    border-left: 1px solid var(--border-color);
+}
+
+.zoom-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    background: var(--white);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.zoom-btn:hover {
+    background: #f0f0f0;
+    border-color: #8bc34a;
+}
+
+.zoom-btn svg {
+    width: 18px;
+    height: 18px;
+    stroke: var(--text-color);
+}
+
+#zoomLevel {
+    min-width: 50px;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.pdf-canvas-container {
+    overflow: auto;
+}
+
 @media (max-width: 1024px) {
     .edit-tool-layout {
         grid-template-columns: 1fr;
@@ -2575,5 +2620,10 @@ input[type="range"]::-webkit-slider-thumb {
     
     .edit-options-panel {
         order: -1;
+    }
+    
+    .zoom-controls {
+        margin-left: 10px;
+        padding-left: 10px;
     }
 }
