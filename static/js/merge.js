@@ -225,9 +225,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (draggedItem === this) return;
         
         const fromIndex = parseInt(draggedItem.dataset.index);
-        const toIndex = parseInt(this.dataset.index);
+        let toIndex = parseInt(this.dataset.index);
         
         const [movedItem] = uploadedFiles.splice(fromIndex, 1);
+        
+        if (fromIndex < toIndex) {
+            toIndex--;
+        }
+        
         uploadedFiles.splice(toIndex, 0, movedItem);
         
         renderFileGrid();
