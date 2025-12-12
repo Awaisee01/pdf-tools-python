@@ -25,7 +25,7 @@ from tools.unlock_pdf import unlock_pdf
 from tools.protect_pdf import protect_pdf
 from tools.sign_pdf import sign_pdf
 from tools.watermark_pdf import watermark_pdf
-from tools.edit_pdf import edit_pdf
+from tools.edit_pdf import edit_pdf, extract_text_blocks
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SESSION_SECRET', 'dev-secret-key-change-in-production')
@@ -132,6 +132,8 @@ def tool_page(tool_name):
         return render_template('tool_split.html', tool_name=tool_name, **info)
     elif tool_name == 'sign':
         return render_template('tool_sign.html', tool_name=tool_name, **info)
+    elif tool_name == 'edit':
+        return render_template('tool_edit.html', tool_name=tool_name, **info)
     
     return render_template('tool.html', tool_name=tool_name, **info)
 
@@ -289,15 +291,15 @@ def process_tool(tool_name):
             result = watermark_pdf(saved_files[0], output_path, watermark_text, opacity)
         
         elif tool_name == 'edit':
-            text_content = request.form.get('text', '')
-            position = {
-                'x': float(request.form.get('x', 100)),
-                'y': float(request.form.get('y', 100)),
-                'page': int(request.form.get('page', 1))
-            }
+            import json
+            edits_json = request.form.get('edits', '[]')
+            try:
+                edits = json.loads(edits_json)
+            except:
+                edits = []
             output_filename = 'edited.pdf'
             output_path = os.path.join(PROCESSED_FOLDER, generate_unique_filename(output_filename))
-            result = edit_pdf(saved_files[0], output_path, text_content, position)
+            result = edit_pdf(saved_files[0], output_path, edits)
         
         else:
             return jsonify({'error': 'Unknown tool'}), 400
@@ -328,6 +330,26 @@ def download_folder(folder_id):
         cleanup_file(zip_path)
         return send_file(zip_path, as_attachment=True)
     return jsonify({'error': 'Folder not found'}), 404
+
+@app.route('/api/extract-text-blocks', methods=['POST'])
+def api_extract_text_blocks():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
+        
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+        
+        filename = generate_unique_filename(file.filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        cleanup_file(filepath)
+        
+        result = extract_text_blocks(filepath)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
