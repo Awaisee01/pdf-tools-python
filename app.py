@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, send_file, redirect, url_for,
 from werkzeug.utils import secure_filename
 import threading
 import time
+import atexit
 
 from tools.merge_pdf import merge_pdfs
 from tools.split_pdf import split_pdf
@@ -71,6 +72,48 @@ def cleanup_folder(folderpath, delay=300):
     thread = threading.Thread(target=delete_after_delay)
     thread.daemon = True
     thread.start()
+
+FILE_MAX_AGE_SECONDS = 1800
+CLEANUP_INTERVAL_SECONDS = 300
+cleanup_thread_running = True
+
+def auto_cleanup_old_files():
+    while cleanup_thread_running:
+        try:
+            current_time = time.time()
+            for folder in [UPLOAD_FOLDER, PROCESSED_FOLDER]:
+                if not os.path.exists(folder):
+                    continue
+                for item in os.listdir(folder):
+                    item_path = os.path.join(folder, item)
+                    try:
+                        if os.path.isfile(item_path):
+                            file_age = current_time - os.path.getmtime(item_path)
+                            if file_age > FILE_MAX_AGE_SECONDS:
+                                os.remove(item_path)
+                                print(f"Auto-deleted old file: {item_path}")
+                        elif os.path.isdir(item_path):
+                            folder_age = current_time - os.path.getmtime(item_path)
+                            if folder_age > FILE_MAX_AGE_SECONDS:
+                                shutil.rmtree(item_path)
+                                print(f"Auto-deleted old folder: {item_path}")
+                    except Exception as e:
+                        print(f"Error deleting {item_path}: {e}")
+        except Exception as e:
+            print(f"Error in auto cleanup: {e}")
+        time.sleep(CLEANUP_INTERVAL_SECONDS)
+
+def start_cleanup_scheduler():
+    cleanup_thread = threading.Thread(target=auto_cleanup_old_files, daemon=True)
+    cleanup_thread.start()
+    print(f"Background cleanup scheduler started (deletes files older than {FILE_MAX_AGE_SECONDS // 60} minutes)")
+
+def stop_cleanup_scheduler():
+    global cleanup_thread_running
+    cleanup_thread_running = False
+
+start_cleanup_scheduler()
+atexit.register(stop_cleanup_scheduler)
 
 @app.route('/')
 def index():

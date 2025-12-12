@@ -77,10 +77,16 @@ This is a fully functional PDF tool website with 20+ tools for manipulating, con
 ```
 
 ## Security Features
-- Files are automatically deleted 5 minutes after processing
+- **Background auto-delete scheduler**: Files are automatically deleted after 30 minutes
+- Cleanup runs every 5 minutes to check for old files in uploads/ and processed/ folders
+- Per-file cleanup also runs for immediate deletion after 5 minutes
 - No files are stored permanently
 - All processing happens locally
 - Session-based management
+
+## Auto-Delete Configuration (in app.py)
+- `FILE_MAX_AGE_SECONDS = 1800` - Files older than 30 minutes are deleted
+- `CLEANUP_INTERVAL_SECONDS = 300` - Cleanup check runs every 5 minutes
 
 ## Running the Application
 The application runs on port 5000 and is configured to run with Flask's development server.
