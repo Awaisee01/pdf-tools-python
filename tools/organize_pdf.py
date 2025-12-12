@@ -8,19 +8,23 @@ def organize_pdf(input_path, output_path, order):
         if not order:
             return {'success': False, 'error': 'No page order specified'}
         
-        new_order = []
+        new_pdf = fitz.open()
+        
         for p in order.split(','):
             p = p.strip()
-            page_num = int(p) - 1
-            if 0 <= page_num < total_pages:
-                new_order.append(page_num)
+            if p == 'blank':
+                page_rect = pdf[0].rect if total_pages > 0 else fitz.Rect(0, 0, 595, 842)
+                new_pdf.new_page(width=page_rect.width, height=page_rect.height)
+            else:
+                try:
+                    page_num = int(p) - 1
+                    if 0 <= page_num < total_pages:
+                        new_pdf.insert_pdf(pdf, from_page=page_num, to_page=page_num)
+                except ValueError:
+                    continue
         
-        if not new_order:
-            return {'success': False, 'error': 'Invalid page order'}
-        
-        new_pdf = fitz.open()
-        for page_num in new_order:
-            new_pdf.insert_pdf(pdf, from_page=page_num, to_page=page_num)
+        if len(new_pdf) == 0:
+            return {'success': False, 'error': 'No valid pages to organize'}
         
         new_pdf.save(output_path)
         new_pdf.close()
