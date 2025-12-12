@@ -286,7 +286,7 @@ body.menu-open {
 .hero {
     background: linear-gradient(135deg, var(--primary-color) 0%, #2563eb 100%);
     color: var(--white);
-    padding: 80px 0;
+    padding: 40px 0;
     text-align: center;
 }
 
