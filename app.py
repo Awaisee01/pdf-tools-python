@@ -127,6 +127,12 @@ def tool_page(tool_name):
         return redirect(url_for('index'))
     
     info = tool_info[tool_name]
+    
+    if tool_name == 'split':
+        return render_template('tool_split.html', tool_name=tool_name, **info)
+    elif tool_name == 'sign':
+        return render_template('tool_sign.html', tool_name=tool_name, **info)
+    
     return render_template('tool.html', tool_name=tool_name, **info)
 
 @app.route('/process/<tool_name>', methods=['POST'])

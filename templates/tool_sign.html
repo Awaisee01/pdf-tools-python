@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Sign PDF - PDF Tools{% endblock %}
+
+{% block content %}
+<section class="tool-page advanced-tool">
+    <div class="container">
+        <a href="/" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to All Tools
+        </a>
+        
+        <div class="advanced-tool-layout sign-layout" id="signToolLayout" style="display: none;">
+            <div class="page-thumbnails-sidebar">
+                <h3>Pages</h3>
+                <div class="page-thumbnails-list" id="pageThumbnails"></div>
+            </div>
+            
+            <div class="pdf-preview-area sign-preview">
+                <div class="pdf-canvas-container" id="pdfCanvasContainer">
+                    <canvas id="pdfCanvas"></canvas>
+                    <div class="signature-overlay" id="signatureOverlay"></div>
+                </div>
+                <div class="page-navigation">
+                    <button type="button" id="prevPage" disabled>&lt; Previous</button>
+                    <span id="pageInfo">Page 1 of 1</span>
+                    <button type="button" id="nextPage" disabled>Next &gt;</button>
+                </div>
+            </div>
+            
+            <div class="signing-options-panel">
+                <h2>Signing Options</h2>
+                
+                <div class="sign-type-section">
+                    <label class="section-label">TYPE</label>
+                    <div class="sign-type-buttons">
+                        <button type="button" class="sign-type-btn active" data-type="simple">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                            </svg>
+                            <span>Simple Signature</span>
+                        </button>
+                        <button type="button" class="sign-type-btn" data-type="digital">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span>Digital Signature</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="required-fields-section">
+                    <label class="section-label">REQUIRED FIELDS</label>
+                    <div class="field-item signature-field" id="addSignatureField">
+                        <div class="field-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                            </svg>
+                        </div>
+                        <div class="field-text">
+                            <span class="field-name">Signature</span>
+                            <span class="field-action">Click to add</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="optional-fields-section">
+                    <label class="section-label">OPTIONAL FIELDS</label>
+                    <div class="field-item" id="addInitialsField">
+                        <div class="field-icon small">AB</div>
+                        <div class="field-text">
+                            <span class="field-name">Initials</span>
+                            <span class="field-action">Click to add</span>
+                        </div>
+                    </div>
+                    <div class="field-item" id="addNameField">
+                        <div class="field-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <div class="field-text">
+                            <span class="field-name">Name</span>
+                            <span class="field-action">Click to add</span>
+                        </div>
+                    </div>
+                    <div class="field-item" id="addDateField">
+                        <div class="field-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                        </div>
+                        <div class="field-text">
+                            <span class="field-name">Date</span>
+                            <span class="field-action">Click to add</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="signForm" enctype="multipart/form-data">
+                    <input type="hidden" name="signature" id="signatureData" value="">
+                    <input type="hidden" name="signature_x" id="signatureX" value="100">
+                    <input type="hidden" name="signature_y" id="signatureY" value="100">
+                    <input type="hidden" name="page" id="signaturePage" value="1">
+                    <button type="submit" class="btn btn-sign">
+                        Sign PDF
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 8 16 12 12 16"></polyline>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="initial-upload-area" id="initialUpload">
+            <div class="tool-title">
+                <h1>Sign PDF</h1>
+                <p>Add your signature to any PDF document</p>
+            </div>
+            
+            <div class="upload-card-centered">
+                <div class="upload-zone" id="dropzone">
+                    <div class="upload-icon-wrapper">
+                        <svg class="upload-box-icon" viewBox="0 0 64 64" fill="none">
+                            <path d="M52 24v28a4 4 0 01-4 4H16a4 4 0 01-4-4V24" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M8 24l24-16 24 16" stroke="#303f9f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M32 24v20" stroke="#3f51b5" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M24 36l8 8 8-8" stroke="#3f51b5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h4>Drop your PDF here</h4>
+                    <p>or click to browse files</p>
+                    <input type="file" id="fileInput" name="files" accept=".pdf" hidden>
+                    <button type="button" class="btn btn-select" id="browseBtn">Select PDF</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="signatureModal" class="signature-modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create Your Signature</h3>
+                    <button type="button" class="modal-close" id="closeModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="signature-name-inputs">
+                        <div class="name-input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="fullNameInput" placeholder="Enter your name">
+                        </div>
+                        <div class="name-input-group">
+                            <label>Initials</label>
+                            <input type="text" id="initialsInput" placeholder="e.g. JD" maxlength="3">
+                        </div>
+                    </div>
+                    
+                    <div class="signature-tabs">
+                        <button type="button" class="sig-tab active" data-tab="type">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="4 7 4 4 20 4 20 7"></polyline>
+                                <line x1="9" y1="20" x2="15" y2="20"></line>
+                                <line x1="12" y1="4" x2="12" y2="20"></line>
+                            </svg>
+                            Type
+                        </button>
+                        <button type="button" class="sig-tab" data-tab="draw">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                            </svg>
+                            Draw
+                        </button>
+                        <button type="button" class="sig-tab" data-tab="upload">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="17 8 12 3 7 8"></polyline>
+                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                            </svg>
+                            Upload
+                        </button>
+                    </div>
+                    
+                    <div class="signature-tab-content" id="typeTabContent">
+                        <div class="font-options">
+                            <label class="font-option">
+                                <input type="radio" name="signatureFont" value="cursive1" checked>
+                                <span class="font-preview cursive1">Your Name</span>
+                            </label>
+                            <label class="font-option">
+                                <input type="radio" name="signatureFont" value="cursive2">
+                                <span class="font-preview cursive2">Your Name</span>
+                            </label>
+                            <label class="font-option">
+                                <input type="radio" name="signatureFont" value="cursive3">
+                                <span class="font-preview cursive3">Your Name</span>
+                            </label>
+                        </div>
+                        <div class="color-options">
+                            <label>Color:</label>
+                            <div class="color-buttons">
+                                <button type="button" class="color-btn active" data-color="#000000" style="background: #000000;"></button>
+                                <button type="button" class="color-btn" data-color="#e74c3c" style="background: #e74c3c;"></button>
+                                <button type="button" class="color-btn" data-color="#3498db" style="background: #3498db;"></button>
+                                <button type="button" class="color-btn" data-color="#27ae60" style="background: #27ae60;"></button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="signature-tab-content" id="drawTabContent" style="display: none;">
+                        <canvas id="drawCanvas" width="400" height="150"></canvas>
+                        <button type="button" class="btn btn-secondary btn-small" id="clearDrawing">Clear</button>
+                    </div>
+                    
+                    <div class="signature-tab-content" id="uploadTabContent" style="display: none;">
+                        <div class="upload-signature-zone" id="signatureUploadZone">
+                            <input type="file" id="signatureFileInput" accept="image/*" hidden>
+                            <p>Click or drag to upload signature image</p>
+                        </div>
+                        <img id="uploadedSignaturePreview" style="display: none; max-width: 100%; max-height: 150px;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-apply" id="applySignature">Apply</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="result-area" id="resultArea" style="display: none;">
+            <div class="result-card">
+                <svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <h2>Success!</h2>
+                <p id="resultMessage">Your PDF has been signed successfully.</p>
+                <div class="download-buttons" id="downloadButtons"></div>
+                <button class="btn btn-secondary" id="processAnother">Sign Another PDF</button>
+            </div>
+        </div>
+        
+        <div class="error-area" id="errorArea" style="display: none;">
+            <div class="error-card">
+                <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <h2>Error</h2>
+                <p id="errorMessage">Something went wrong.</p>
+                <button class="btn btn-primary" id="tryAgain">Try Again</button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+<script src="{{ url_for('static', filename='js/sign.js') }}"></script>
+{% endblock %}
