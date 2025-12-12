@@ -117,7 +117,7 @@ atexit.register(stop_cleanup_scheduler)
 
 @app.route('/')
 def index():
-    tools = [
+    all_tools = [
         {'name': 'Merge PDF', 'icon': 'merge', 'description': 'Combine multiple PDFs into one', 'url': '/tool/merge', 'color': '#e74c3c'},
         {'name': 'Split PDF', 'icon': 'split', 'description': 'Separate PDF pages', 'url': '/tool/split', 'color': '#3498db'},
         {'name': 'Compress PDF', 'icon': 'compress', 'description': 'Reduce PDF file size', 'url': '/tool/compress', 'color': '#2ecc71'},
@@ -139,7 +139,10 @@ def index():
         {'name': 'Watermark PDF', 'icon': 'watermark', 'description': 'Add watermark to PDF', 'url': '/tool/watermark', 'color': '#009688'},
         {'name': 'Edit PDF', 'icon': 'edit', 'description': 'Add text & images', 'url': '/tool/edit', 'color': '#8bc34a'},
     ]
-    return render_template('index.html', tools=tools)
+    popular_names = ['Merge PDF', 'Compress PDF', 'Split PDF', 'Edit PDF', 'PDF to JPG', 'JPG to PDF']
+    popular_tools = [t for t in all_tools if t['name'] in popular_names]
+    popular_tools.sort(key=lambda x: popular_names.index(x['name']))
+    return render_template('index.html', popular_tools=popular_tools, all_tools=all_tools)
 
 @app.route('/tool/<tool_name>')
 def tool_page(tool_name):

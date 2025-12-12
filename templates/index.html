@@ -10,10 +10,34 @@
     </div>
 </section>
 
-<section class="tools-section">
+<section class="tools-section popular-tools-section">
     <div class="container">
+        <h2 class="section-title">Popular Tools</h2>
         <div class="tools-grid">
-            {% for tool in tools %}
+            {% for tool in popular_tools %}
+            <a href="{{ tool.url }}" class="tool-card" style="--tool-color: {{ tool.color }}">
+                <div class="tool-icon">
+                    {% include "icons/" + tool.icon + ".svg" ignore missing %}
+                    {% if not tool.icon %}
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    {% endif %}
+                </div>
+                <h3>{{ tool.name }}</h3>
+                <p>{{ tool.description }}</p>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="tools-section all-tools-section">
+    <div class="container">
+        <h2 class="section-title">All Tools</h2>
+        <div class="tools-grid">
+            {% for tool in all_tools %}
             <a href="{{ tool.url }}" class="tool-card" style="--tool-color: {{ tool.color }}">
                 <div class="tool-icon">
                     {% include "icons/" + tool.icon + ".svg" ignore missing %}

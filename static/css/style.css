@@ -309,6 +309,23 @@ body.menu-open {
     padding: 60px 0;
 }
 
+.section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.popular-tools-section {
+    padding-bottom: 40px;
+}
+
+.all-tools-section {
+    padding-top: 40px;
+    background: #f8fafc;
+}
+
 .tools-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
