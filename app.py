@@ -138,6 +138,8 @@ def tool_page(tool_name):
         return render_template('tool_organize.html', tool_name=tool_name, **info)
     elif tool_name == 'merge':
         return render_template('tool_merge.html', tool_name=tool_name, **info)
+    elif tool_name == 'crop':
+        return render_template('tool_crop.html', tool_name=tool_name, **info)
     
     return render_template('tool.html', tool_name=tool_name, **info)
 
@@ -200,9 +202,11 @@ def process_tool(tool_name):
                 'left': float(request.form.get('left', 0)),
                 'right': float(request.form.get('right', 0))
             }
+            pages = request.form.get('pages', 'all')
+            current_page = int(request.form.get('current_page', 1))
             output_filename = 'cropped.pdf'
             output_path = os.path.join(PROCESSED_FOLDER, generate_unique_filename(output_filename))
-            result = crop_pdf(saved_files[0], output_path, margins)
+            result = crop_pdf(saved_files[0], output_path, margins, pages, current_page)
         
         elif tool_name == 'remove-pages':
             pages = request.form.get('pages', '')

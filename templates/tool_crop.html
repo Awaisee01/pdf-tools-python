@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Crop PDF - RemakePdf{% endblock %}
+
+{% block content %}
+<section class="tool-page advanced-tool">
+    <div class="container">
+        <a href="/" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to All Tools
+        </a>
+        
+        <div class="advanced-tool-layout crop-layout" id="cropToolLayout" style="display: none;">
+            <div class="pdf-preview-area crop-preview">
+                <div class="pdf-canvas-container" id="pdfCanvasContainer">
+                    <canvas id="pdfCanvas"></canvas>
+                    <div class="crop-overlay" id="cropOverlay">
+                        <div class="crop-selection" id="cropSelection">
+                            <div class="crop-handle top-left"></div>
+                            <div class="crop-handle top-right"></div>
+                            <div class="crop-handle bottom-left"></div>
+                            <div class="crop-handle bottom-right"></div>
+                            <div class="crop-handle top-center"></div>
+                            <div class="crop-handle bottom-center"></div>
+                            <div class="crop-handle left-center"></div>
+                            <div class="crop-handle right-center"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-navigation">
+                    <button type="button" id="prevPage" disabled>&lt; Previous</button>
+                    <span id="pageInfo">Page 1 of 1</span>
+                    <button type="button" id="nextPage" disabled>Next &gt;</button>
+                    <div class="zoom-controls">
+                        <button type="button" class="zoom-btn" id="zoomOut" title="Zoom Out">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                <line x1="8" y1="11" x2="14" y2="11"></line>
+                            </svg>
+                        </button>
+                        <span id="zoomLevel" class="zoom-level">100%</span>
+                        <button type="button" class="zoom-btn" id="zoomIn" title="Zoom In">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                <line x1="11" y1="8" x2="11" y2="14"></line>
+                                <line x1="8" y1="11" x2="14" y2="11"></line>
+                            </svg>
+                        </button>
+                        <button type="button" class="zoom-btn" id="zoomFit" title="Fit to Screen">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="crop-options-panel">
+                <h2>Crop PDF</h2>
+                <p class="crop-instruction">Click and drag to select the area you want to keep. Resize if needed.</p>
+                
+                <a href="#" class="reset-link" id="resetCrop">Reset all</a>
+                
+                <div class="crop-pages-section">
+                    <label class="section-label">APPLY TO</label>
+                    <div class="crop-page-options">
+                        <label class="radio-option">
+                            <input type="radio" name="cropPages" value="all" checked>
+                            <span class="radio-custom"></span>
+                            <span class="radio-label">All pages</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="cropPages" value="current">
+                            <span class="radio-custom"></span>
+                            <span class="radio-label">Current page</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="crop-dimensions" id="cropDimensions" style="display: none;">
+                    <label class="section-label">CROP AREA</label>
+                    <div class="dimension-inputs">
+                        <div class="dimension-group">
+                            <label>Left</label>
+                            <input type="number" id="cropLeft" value="0" min="0" step="1">
+                            <span>px</span>
+                        </div>
+                        <div class="dimension-group">
+                            <label>Top</label>
+                            <input type="number" id="cropTop" value="0" min="0" step="1">
+                            <span>px</span>
+                        </div>
+                        <div class="dimension-group">
+                            <label>Width</label>
+                            <input type="number" id="cropWidth" value="0" min="0" step="1">
+                            <span>px</span>
+                        </div>
+                        <div class="dimension-group">
+                            <label>Height</label>
+                            <input type="number" id="cropHeight" value="0" min="0" step="1">
+                            <span>px</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <form id="cropForm" enctype="multipart/form-data">
+                    <input type="hidden" name="crop_left" id="cropLeftInput" value="0">
+                    <input type="hidden" name="crop_top" id="cropTopInput" value="0">
+                    <input type="hidden" name="crop_right" id="cropRightInput" value="0">
+                    <input type="hidden" name="crop_bottom" id="cropBottomInput" value="0">
+                    <input type="hidden" name="pages" id="cropPagesInput" value="all">
+                    <input type="hidden" name="current_page" id="currentPageInput" value="1">
+                    <button type="submit" class="btn btn-crop">
+                        Crop PDF
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 8 16 12 12 16"></polyline>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="initial-upload-area" id="initialUpload">
+            <div class="tool-title">
+                <h1>Crop PDF</h1>
+                <p>Remove margins and select the area you want to keep</p>
+            </div>
+            
+            <div class="upload-card-centered">
+                <div class="upload-zone" id="dropzone">
+                    <div class="upload-icon-wrapper">
+                        <svg class="upload-box-icon" viewBox="0 0 64 64" fill="none">
+                            <path d="M52 24v28a4 4 0 01-4 4H16a4 4 0 01-4-4V24" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M8 24l24-16 24 16" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M32 24v20" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M24 36l8 8 8-8" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h4>Drop your PDF here</h4>
+                    <p>or click to browse files</p>
+                    <input type="file" id="fileInput" name="files" accept=".pdf" hidden>
+                    <button type="button" class="btn btn-select" id="browseBtn">Select PDF</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="result-area" id="resultArea" style="display: none;">
+            <div class="result-card">
+                <svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <h2>Success!</h2>
+                <p id="resultMessage">Your PDF has been cropped successfully.</p>
+                <div class="download-buttons" id="downloadButtons"></div>
+                <button class="btn btn-secondary" id="processAnother">Crop Another PDF</button>
+            </div>
+        </div>
+        
+        <div class="error-area" id="errorArea" style="display: none;">
+            <div class="error-card">
+                <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <h2>Error</h2>
+                <p id="errorMessage">Something went wrong.</p>
+                <button class="btn btn-primary" id="tryAgain">Try Again</button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+<script src="{{ url_for('static', filename='js/crop.js') }}"></script>
+{% endblock %}
