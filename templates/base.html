@@ -101,13 +101,57 @@
                 </div>
                 <a href="/" class="nav-link-all">All Tools</a>
             </nav>
-            <button class="mobile-menu-btn" id="mobileMenuBtn">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <svg class="menu-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+                <svg class="close-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
             </button>
         </div>
     </header>
+    
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-section">
+                <h3>Merge & Organize</h3>
+                <a href="/tool/merge">Merge PDF</a>
+                <a href="/tool/split">Split PDF</a>
+                <a href="/tool/organize">Organize PDF</a>
+                <a href="/tool/remove-pages">Remove Pages</a>
+            </div>
+            <div class="mobile-menu-section">
+                <h3>Convert</h3>
+                <a href="/tool/pdf-to-jpg">PDF to JPG</a>
+                <a href="/tool/jpg-to-pdf">JPG to PDF</a>
+                <a href="/tool/pdf-to-word">PDF to Word</a>
+                <a href="/tool/word-to-pdf">Word to PDF</a>
+                <a href="/tool/excel-to-pdf">Excel to PDF</a>
+                <a href="/tool/pptx-to-pdf">PowerPoint to PDF</a>
+            </div>
+            <div class="mobile-menu-section">
+                <h3>Edit & Modify</h3>
+                <a href="/tool/rotate">Rotate PDF</a>
+                <a href="/tool/crop">Crop PDF</a>
+                <a href="/tool/compress">Compress PDF</a>
+                <a href="/tool/edit">Edit PDF</a>
+                <a href="/tool/watermark">Watermark PDF</a>
+                <a href="/tool/sign">Sign PDF</a>
+            </div>
+            <div class="mobile-menu-section">
+                <h3>Security</h3>
+                <a href="/tool/protect">Protect PDF</a>
+                <a href="/tool/unlock">Unlock PDF</a>
+            </div>
+            <div class="mobile-menu-section">
+                <h3>Extract</h3>
+                <a href="/tool/extract">Extract Content</a>
+                <a href="/tool/ocr">OCR PDF</a>
+            </div>
+            <a href="/" class="mobile-menu-all-tools">All Tools</a>
+        </div>
+    </div>
     
     <main class="main">
         {% block content %}{% endblock %}
