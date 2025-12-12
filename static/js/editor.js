@@ -19,7 +19,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const zoomInBtn = document.getElementById('zoomIn');
     const zoomOutBtn = document.getElementById('zoomOut');
     const undoTool = document.getElementById('undoTool');
+    const inlineEditToolbar = document.getElementById('inlineEditToolbar');
 
+    const selectTool = document.getElementById('selectTool');
     const textTool = document.getElementById('textTool');
     const linksTool = document.getElementById('linksTool');
     const formsTool = document.getElementById('formsTool');
@@ -40,12 +42,15 @@ document.addEventListener('DOMContentLoaded', function() {
     let pdfScale = 1;
     let baseScale = 1;
     let zoomFactor = 1;
-    let currentTool = 'text';
+    let currentTool = 'select';
     let edits = [];
     let undoStack = [];
     let pendingClickPos = null;
     let selectedColor = '#000000';
     let pendingImageData = null;
+    let textBlocks = {};
+    let selectedTextBlock = null;
+    let editedTextBlocks = {};
 
     browseBtn.addEventListener('click', () => fileInput.click());
     dropzone.addEventListener('click', (e) => {
@@ -80,11 +85,16 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadedFile = file;
         edits = [];
         undoStack = [];
+        textBlocks = {};
+        editedTextBlocks = {};
+        selectedTextBlock = null;
         updateUndoButton();
 
         const arrayBuffer = await file.arrayBuffer();
         pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
         totalPages = pdfDoc.numPages;
+
+        await extractTextBlocks(file);
 
         initialUpload.style.display = 'none';
         editorWorkspace.style.display = 'flex';
@@ -93,7 +103,30 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePageNavigation();
     }
 
+    async function extractTextBlocks(file) {
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/api/extract-text-blocks', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.success && result.pages) {
+                result.pages.forEach(pageData => {
+                    textBlocks[pageData.page] = pageData.text_blocks;
+                });
+            }
+        } catch (error) {
+            console.error('Failed to extract text blocks:', error);
+        }
+    }
+
     async function renderPage(pageNum, preserveZoom = false) {
+        currentPage = pageNum;
         const page = await pdfDoc.getPage(pageNum);
         const container = document.getElementById('editorCanvasWrapper');
         const maxWidth = container.clientWidth - 40 || 700;
@@ -123,14 +156,248 @@ document.addEventListener('DOMContentLoaded', function() {
         editorOverlay.style.height = scaledViewport.height + 'px';
 
         renderEdits();
+        if (currentTool === 'select') {
+            renderTextBlocks();
+        }
     }
 
     function renderEdits() {
-        editorOverlay.innerHTML = '';
+        const existingEdits = editorOverlay.querySelectorAll('.edit-element');
+        existingEdits.forEach(el => el.remove());
 
         edits.filter(e => e.page === currentPage).forEach((edit, index) => {
             const el = createEditElement(edit, index);
             if (el) editorOverlay.appendChild(el);
+        });
+    }
+
+    function renderTextBlocks() {
+        const existingBlocks = editorOverlay.querySelectorAll('.text-block-overlay');
+        existingBlocks.forEach(el => el.remove());
+
+        const pageBlocks = textBlocks[currentPage] || [];
+        pageBlocks.forEach((block, index) => {
+            const editedBlock = editedTextBlocks[block.id];
+            if (editedBlock && editedBlock.deleted) return;
+
+            const el = document.createElement('div');
+            el.className = 'text-block-overlay';
+            el.style.left = (block.x * pdfScale) + 'px';
+            el.style.top = (block.y * pdfScale) + 'px';
+            el.style.width = (block.width * pdfScale) + 'px';
+            el.style.height = (block.height * pdfScale) + 'px';
+            el.dataset.blockId = block.id;
+            el.dataset.index = index;
+
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectTextBlock(block, el);
+            });
+
+            editorOverlay.appendChild(el);
+        });
+    }
+
+    function selectTextBlock(block, element) {
+        document.querySelectorAll('.text-block-overlay.selected').forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        element.classList.add('selected');
+        selectedTextBlock = block;
+
+        showInlineToolbar(element, block);
+    }
+
+    function showInlineToolbar(element, block) {
+        const rect = element.getBoundingClientRect();
+        const containerRect = editorOverlay.getBoundingClientRect();
+
+        inlineEditToolbar.style.display = 'flex';
+        inlineEditToolbar.style.left = (rect.left - containerRect.left) + 'px';
+        inlineEditToolbar.style.top = (rect.top - containerRect.top - 45) + 'px';
+
+        if (rect.top - containerRect.top < 50) {
+            inlineEditToolbar.style.top = (rect.bottom - containerRect.top + 5) + 'px';
+        }
+    }
+
+    function hideInlineToolbar() {
+        inlineEditToolbar.style.display = 'none';
+        selectedTextBlock = null;
+        document.querySelectorAll('.text-block-overlay.selected').forEach(el => {
+            el.classList.remove('selected');
+        });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.text-block-overlay') && 
+            !e.target.closest('#inlineEditToolbar') &&
+            !e.target.closest('.inline-dropdown-menu')) {
+            hideInlineToolbar();
+        }
+    });
+
+    document.getElementById('inlineDelete')?.addEventListener('click', () => {
+        if (selectedTextBlock) {
+            editedTextBlocks[selectedTextBlock.id] = {
+                ...selectedTextBlock,
+                deleted: true
+            };
+
+            edits.push({
+                type: 'delete',
+                page: selectedTextBlock.page,
+                rect: [selectedTextBlock.x, selectedTextBlock.y, selectedTextBlock.width, selectedTextBlock.height],
+                blockId: selectedTextBlock.id
+            });
+
+            updateUndoButton();
+            hideInlineToolbar();
+            renderTextBlocks();
+        }
+    });
+
+    document.getElementById('inlineFontBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dropdown = document.getElementById('fontDropdown');
+        dropdown.classList.toggle('show');
+        document.getElementById('colorDropdown')?.classList.remove('show');
+    });
+
+    document.getElementById('inlineColorBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const dropdown = document.getElementById('colorDropdown');
+        dropdown.classList.toggle('show');
+        document.getElementById('fontDropdown')?.classList.remove('show');
+    });
+
+    document.querySelectorAll('#fontDropdown button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (selectedTextBlock) {
+                const font = btn.dataset.font;
+                const existingEdit = editedTextBlocks[selectedTextBlock.id] || selectedTextBlock;
+                
+                editedTextBlocks[selectedTextBlock.id] = {
+                    ...existingEdit,
+                    font_name: font,
+                    modified: true
+                };
+
+                edits.push({
+                    type: 'modify',
+                    page: selectedTextBlock.page,
+                    original_rect: [selectedTextBlock.x, selectedTextBlock.y, selectedTextBlock.width, selectedTextBlock.height],
+                    new_text: existingEdit.new_text || selectedTextBlock.text,
+                    font_size: existingEdit.font_size || selectedTextBlock.font_size,
+                    font_name: font,
+                    blockId: selectedTextBlock.id
+                });
+                updateUndoButton();
+            }
+            document.getElementById('fontDropdown').classList.remove('show');
+        });
+    });
+
+    document.querySelectorAll('#colorDropdown .color-swatch').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (selectedTextBlock) {
+                const color = btn.dataset.color;
+                const existingEdit = editedTextBlocks[selectedTextBlock.id] || selectedTextBlock;
+                
+                editedTextBlocks[selectedTextBlock.id] = {
+                    ...existingEdit,
+                    color: color,
+                    modified: true
+                };
+
+                edits.push({
+                    type: 'modify',
+                    page: selectedTextBlock.page,
+                    original_rect: [selectedTextBlock.x, selectedTextBlock.y, selectedTextBlock.width, selectedTextBlock.height],
+                    new_text: existingEdit.new_text || selectedTextBlock.text,
+                    font_size: existingEdit.font_size || selectedTextBlock.font_size,
+                    color: color,
+                    blockId: selectedTextBlock.id
+                });
+                updateUndoButton();
+            }
+            document.getElementById('colorDropdown').classList.remove('show');
+        });
+    });
+
+    editorOverlay.addEventListener('dblclick', (e) => {
+        if (currentTool !== 'select') return;
+        
+        const blockEl = e.target.closest('.text-block-overlay');
+        if (!blockEl) return;
+
+        const blockId = blockEl.dataset.blockId;
+        const block = (textBlocks[currentPage] || []).find(b => b.id === blockId);
+        if (!block) return;
+
+        openTextEditModal(block);
+    });
+
+    function openTextEditModal(block) {
+        const existingModal = document.getElementById('editTextModal');
+        if (existingModal) existingModal.remove();
+
+        const editedBlock = editedTextBlocks[block.id] || block;
+
+        const modal = document.createElement('div');
+        modal.id = 'editTextModal';
+        modal.className = 'text-input-modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Edit Text</h3>
+                    <button type="button" class="modal-close" id="closeEditModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="editTextArea" rows="5" style="width:100%;padding:10px;font-size:14px;border:1px solid #ddd;border-radius:4px;">${editedBlock.new_text || editedBlock.text}</textarea>
+                    <div class="text-options" style="margin-top:15px;">
+                        <div class="option-row">
+                            <label>Font Size:</label>
+                            <input type="number" id="editFontSize" value="${Math.round(editedBlock.font_size || block.font_size)}" min="8" max="72">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelEditText">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveEditText">Save Changes</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+
+        document.getElementById('closeEditModal').addEventListener('click', () => modal.remove());
+        document.getElementById('cancelEditText').addEventListener('click', () => modal.remove());
+
+        document.getElementById('saveEditText').addEventListener('click', () => {
+            const newText = document.getElementById('editTextArea').value;
+            const fontSize = parseInt(document.getElementById('editFontSize').value) || block.font_size;
+
+            editedTextBlocks[block.id] = {
+                ...block,
+                new_text: newText,
+                font_size: fontSize,
+                modified: true
+            };
+
+            edits.push({
+                type: 'modify',
+                page: block.page,
+                original_rect: [block.x, block.y, block.width, block.height],
+                new_text: newText,
+                font_size: fontSize,
+                blockId: block.id
+            });
+
+            updateUndoButton();
+            modal.remove();
+            hideInlineToolbar();
         });
     }
 
@@ -163,6 +430,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (edit.shape === 'circle') {
                 wrapper.style.borderRadius = '50%';
             }
+        } else if (edit.type === 'add') {
+            wrapper.style.fontSize = ((edit.font_size || 12) * pdfScale) + 'px';
+            wrapper.style.color = edit.color || '#000';
+            wrapper.textContent = edit.text || '';
         }
 
         const removeBtn = document.createElement('button');
@@ -216,14 +487,25 @@ document.addEventListener('DOMContentLoaded', function() {
         const pageEdits = edits.filter(e => e.page === currentPage);
         const globalIndex = edits.indexOf(pageEdits[index]);
         if (globalIndex >= 0) {
-            undoStack.push(edits.splice(globalIndex, 1)[0]);
+            const removedEdit = edits.splice(globalIndex, 1)[0];
+            undoStack.push(removedEdit);
+
+            if (removedEdit.blockId && editedTextBlocks[removedEdit.blockId]) {
+                delete editedTextBlocks[removedEdit.blockId];
+            }
+
             updateUndoButton();
             renderEdits();
+            if (currentTool === 'select') {
+                renderTextBlocks();
+            }
         }
     }
 
     function updateUndoButton() {
-        undoTool.disabled = undoStack.length === 0 && edits.length === 0;
+        if (undoTool) {
+            undoTool.disabled = undoStack.length === 0 && edits.length === 0;
+        }
     }
 
     function updatePageNavigation() {
@@ -267,17 +549,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const toolButtons = [textTool, linksTool, formsTool, imagesTool, signTool, whiteoutTool, annotateTool, shapesTool];
+    const toolButtons = [selectTool, textTool, linksTool, formsTool, imagesTool, signTool, whiteoutTool, annotateTool, shapesTool];
 
     function setActiveTool(btn, toolName) {
         toolButtons.forEach(b => b && b.classList.remove('active'));
         if (btn) btn.classList.add('active');
         currentTool = toolName;
         updateOverlayCursor();
+        hideInlineToolbar();
+
+        const existingBlocks = editorOverlay.querySelectorAll('.text-block-overlay');
+        if (toolName === 'select') {
+            renderTextBlocks();
+        } else {
+            existingBlocks.forEach(el => el.remove());
+        }
     }
 
     function updateOverlayCursor() {
-        if (currentTool === 'whiteout') {
+        if (currentTool === 'select') {
+            editorOverlay.style.cursor = 'text';
+        } else if (currentTool === 'whiteout' || currentTool === 'shape') {
             editorOverlay.style.cursor = 'crosshair';
         } else if (currentTool === 'text' || currentTool === 'image' || currentTool === 'sign') {
             editorOverlay.style.cursor = 'crosshair';
@@ -286,7 +578,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    textTool.addEventListener('click', () => setActiveTool(textTool, 'text'));
+    if (selectTool) selectTool.addEventListener('click', () => setActiveTool(selectTool, 'select'));
+    if (textTool) textTool.addEventListener('click', () => setActiveTool(textTool, 'text'));
     if (linksTool) linksTool.addEventListener('click', () => setActiveTool(linksTool, 'link'));
     if (formsTool) formsTool.addEventListener('click', () => setActiveTool(formsTool, 'form'));
     if (imagesTool) imagesTool.addEventListener('click', () => setActiveTool(imagesTool, 'image'));
@@ -625,13 +918,24 @@ document.addEventListener('DOMContentLoaded', function() {
         pendingClickPos = null;
     });
 
-    undoTool.addEventListener('click', () => {
-        if (edits.length > 0) {
-            undoStack.push(edits.pop());
-            updateUndoButton();
-            renderEdits();
-        }
-    });
+    if (undoTool) {
+        undoTool.addEventListener('click', () => {
+            if (edits.length > 0) {
+                const removedEdit = edits.pop();
+                undoStack.push(removedEdit);
+
+                if (removedEdit.blockId && editedTextBlocks[removedEdit.blockId]) {
+                    delete editedTextBlocks[removedEdit.blockId];
+                }
+
+                updateUndoButton();
+                renderEdits();
+                if (currentTool === 'select') {
+                    renderTextBlocks();
+                }
+            }
+        });
+    }
 
     applyChangesBtn.addEventListener('click', async () => {
         if (!uploadedFile) {
@@ -695,8 +999,12 @@ document.addEventListener('DOMContentLoaded', function() {
         undoStack = [];
         pendingClickPos = null;
         pendingImageData = null;
+        textBlocks = {};
+        editedTextBlocks = {};
+        selectedTextBlock = null;
 
         editorOverlay.innerHTML = '';
+        hideInlineToolbar();
 
         editorWorkspace.style.display = 'none';
         resultArea.style.display = 'none';

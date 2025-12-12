@@ -150,11 +150,18 @@ def edit_pdf(input_path, output_path, edits):
                 
                 new_text = edit.get('new_text', '')
                 font_size = edit.get('font_size', 12)
+                font_name = edit.get('font_name', 'helv')
+                color = edit.get('color', '#000000')
+                
+                if isinstance(color, str):
+                    color = hex_to_rgb(color)
+                elif isinstance(color, list):
+                    color = tuple(c if c <= 1 else c/255 for c in color)
                 
                 if new_text:
                     text_point = fitz.Point(rect[0], rect[1] + font_size)
                     page.insert_text(text_point, new_text, fontsize=font_size, 
-                                   fontname="helv", color=(0, 0, 0))
+                                   fontname=font_name, color=color)
             
             elif edit_type == 'add':
                 x = edit.get('x', 100)
