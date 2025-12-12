@@ -15,7 +15,16 @@
         <div class="editor-workspace" id="editorWorkspace" style="display: none;">
             <div class="editor-toolbar">
                 <div class="toolbar-group">
-                    <button type="button" class="toolbar-btn active" id="textTool" title="Add Text">
+                    <button type="button" class="toolbar-btn active" id="selectTool" title="Select & Edit Text">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 5h18"/>
+                            <path d="M3 12h10"/>
+                            <path d="M3 19h14"/>
+                            <path d="M17 15l4 4-4 4"/>
+                        </svg>
+                        <span>Select</span>
+                    </button>
+                    <button type="button" class="toolbar-btn" id="textTool" title="Add Text">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="4 7 4 4 20 4 20 7"/>
                             <line x1="9" y1="20" x2="15" y2="20"/>
@@ -247,6 +256,45 @@
         </div>
     </div>
 </section>
+
+<div class="inline-edit-toolbar" id="inlineEditToolbar" style="display: none;">
+    <button type="button" class="inline-btn" id="inlineBold" title="Bold"><b>B</b></button>
+    <button type="button" class="inline-btn italic" id="inlineItalic" title="Italic"><i>I</i></button>
+    <button type="button" class="inline-btn underline" id="inlineUnderline" title="Underline"><u>T</u></button>
+    <div class="inline-divider"></div>
+    <div class="inline-dropdown">
+        <button type="button" class="inline-btn" id="inlineFontBtn">Font <svg viewBox="0 0 24 24" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="inline-dropdown-menu" id="fontDropdown">
+            <button data-font="helv">Helvetica</button>
+            <button data-font="times">Times</button>
+            <button data-font="cour">Courier</button>
+        </div>
+    </div>
+    <div class="inline-dropdown">
+        <button type="button" class="inline-btn" id="inlineColorBtn">Color <svg viewBox="0 0 24 24" width="12" height="12"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="inline-dropdown-menu color-menu" id="colorDropdown">
+            <button class="color-swatch" data-color="#000000" style="background:#000"></button>
+            <button class="color-swatch" data-color="#e74c3c" style="background:#e74c3c"></button>
+            <button class="color-swatch" data-color="#3498db" style="background:#3498db"></button>
+            <button class="color-swatch" data-color="#27ae60" style="background:#27ae60"></button>
+            <button class="color-swatch" data-color="#9b59b6" style="background:#9b59b6"></button>
+            <button class="color-swatch" data-color="#f39c12" style="background:#f39c12"></button>
+        </div>
+    </div>
+    <div class="inline-divider"></div>
+    <button type="button" class="inline-btn" id="inlineLink" title="Add Link">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+    </button>
+    <button type="button" class="inline-btn" id="inlineDelete" title="Delete Text">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+        </svg>
+    </button>
+</div>
 
 <div class="text-input-modal" id="textInputModal" style="display: none;">
     <div class="modal-content">
