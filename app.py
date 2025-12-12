@@ -136,6 +136,8 @@ def tool_page(tool_name):
         return render_template('tool_edit.html', tool_name=tool_name, **info)
     elif tool_name == 'organize':
         return render_template('tool_organize.html', tool_name=tool_name, **info)
+    elif tool_name == 'merge':
+        return render_template('tool_merge.html', tool_name=tool_name, **info)
     
     return render_template('tool.html', tool_name=tool_name, **info)
 
