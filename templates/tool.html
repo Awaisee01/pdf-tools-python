@@ -17,201 +17,228 @@
 
 <section class="tool-content">
     <div class="container">
-        <div class="upload-area" id="uploadArea">
-            <form id="uploadForm" enctype="multipart/form-data">
-                <div class="dropzone" id="dropzone">
-                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                        <polyline points="17 8 12 3 7 8"/>
-                        <line x1="12" y1="3" x2="12" y2="15"/>
-                    </svg>
-                    <h3>Drop your files here</h3>
-                    <p>or click to browse</p>
-                    <input type="file" id="fileInput" name="files" accept="{{ accept }}" {% if multiple %}multiple{% endif %} hidden>
-                    <button type="button" class="btn btn-primary" id="browseBtn">Select Files</button>
+        <div class="tool-layout">
+            <div class="tool-sidebar">
+                <div class="tool-info-card">
+                    <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg> How it works</h3>
+                    <ol class="how-it-works">
+                        <li><span>1</span> Upload your file(s)</li>
+                        <li><span>2</span> Adjust settings if needed</li>
+                        <li><span>3</span> Click process and download</li>
+                    </ol>
                 </div>
-                
-                <div class="file-list" id="fileList" style="display: none;">
-                    <h4>Selected Files:</h4>
-                    <ul id="selectedFiles"></ul>
+                <div class="tool-info-card">
+                    <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Features</h3>
+                    <ul class="feature-list">
+                        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> 100% Free</li>
+                        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Secure & Private</li>
+                        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> No Registration</li>
+                        <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Auto-delete files</li>
+                    </ul>
                 </div>
-                
-                <div class="tool-options" id="toolOptions" style="display: none;">
-                    {% if tool_name == 'split' %}
-                    <div class="option-group">
-                        <label>Split Type:</label>
-                        <select name="split_type" id="splitType">
-                            <option value="all">Extract all pages</option>
-                            <option value="range">Custom page ranges</option>
-                        </select>
-                    </div>
-                    <div class="option-group" id="pagesGroup" style="display: none;">
-                        <label>Pages (e.g., 1-3, 5, 7-10):</label>
-                        <input type="text" name="pages" placeholder="1-3, 5, 7-10">
-                    </div>
-                    {% elif tool_name == 'compress' %}
-                    <div class="option-group">
-                        <label>Quality:</label>
-                        <select name="quality">
-                            <option value="high">High (Larger file)</option>
-                            <option value="medium" selected>Medium (Balanced)</option>
-                            <option value="low">Low (Smaller file)</option>
-                        </select>
-                    </div>
-                    {% elif tool_name == 'rotate' %}
-                    <div class="option-group">
-                        <label>Rotation:</label>
-                        <select name="angle">
-                            <option value="90">90° Clockwise</option>
-                            <option value="180">180°</option>
-                            <option value="270">90° Counter-clockwise</option>
-                        </select>
-                    </div>
-                    <div class="option-group">
-                        <label>Apply to pages (leave empty for all):</label>
-                        <input type="text" name="pages" placeholder="e.g., 1-3, 5" value="all">
-                    </div>
-                    {% elif tool_name == 'crop' %}
-                    <div class="option-group">
-                        <label>Margins to crop (in points):</label>
-                        <div class="margin-inputs">
-                            <input type="number" name="top" placeholder="Top" value="0" min="0">
-                            <input type="number" name="right" placeholder="Right" value="0" min="0">
-                            <input type="number" name="bottom" placeholder="Bottom" value="0" min="0">
-                            <input type="number" name="left" placeholder="Left" value="0" min="0">
-                        </div>
-                    </div>
-                    {% elif tool_name == 'remove-pages' %}
-                    <div class="option-group">
-                        <label>Pages to remove:</label>
-                        <input type="text" name="pages" placeholder="e.g., 1, 3-5, 8" required>
-                    </div>
-                    {% elif tool_name == 'organize' %}
-                    <div class="option-group">
-                        <label>New page order (comma-separated):</label>
-                        <input type="text" name="order" placeholder="e.g., 3, 1, 2, 5, 4" required>
-                        <small>Enter page numbers in the desired order</small>
-                    </div>
-                    {% elif tool_name == 'pdf-to-jpg' %}
-                    <div class="option-group">
-                        <label>Image Quality (DPI):</label>
-                        <select name="dpi">
-                            <option value="72">72 DPI (Low)</option>
-                            <option value="150" selected>150 DPI (Medium)</option>
-                            <option value="300">300 DPI (High)</option>
-                        </select>
-                    </div>
-                    {% elif tool_name == 'extract' %}
-                    <div class="option-group">
-                        <label>Extract:</label>
-                        <select name="extract_type">
-                            <option value="text">Text</option>
-                            <option value="images">Images</option>
-                        </select>
-                    </div>
-                    {% elif tool_name == 'ocr' %}
-                    <div class="option-group">
-                        <label>Language:</label>
-                        <select name="language">
-                            <option value="eng" selected>English</option>
-                            <option value="fra">French</option>
-                            <option value="deu">German</option>
-                            <option value="spa">Spanish</option>
-                            <option value="ita">Italian</option>
-                            <option value="por">Portuguese</option>
-                        </select>
-                    </div>
-                    {% elif tool_name == 'unlock' %}
-                    <div class="option-group">
-                        <label>PDF Password:</label>
-                        <input type="password" name="password" placeholder="Enter the PDF password">
-                    </div>
-                    {% elif tool_name == 'protect' %}
-                    <div class="option-group">
-                        <label>Set Password:</label>
-                        <input type="password" name="password" placeholder="Enter a strong password" required>
-                    </div>
-                    {% elif tool_name == 'sign' %}
-                    <div class="option-group">
-                        <label>Signature:</label>
-                        <div class="signature-area">
-                            <canvas id="signatureCanvas" width="400" height="150"></canvas>
-                            <div class="signature-buttons">
-                                <button type="button" class="btn btn-secondary" id="clearSignature">Clear</button>
-                            </div>
-                        </div>
-                        <input type="hidden" name="signature" id="signatureData">
-                    </div>
-                    <div class="option-group">
-                        <label>Position:</label>
-                        <div class="position-inputs">
-                            <input type="number" name="x" placeholder="X" value="100">
-                            <input type="number" name="y" placeholder="Y" value="700">
-                            <input type="number" name="page" placeholder="Page" value="1" min="1">
-                        </div>
-                    </div>
-                    {% elif tool_name == 'watermark' %}
-                    <div class="option-group">
-                        <label>Watermark Text:</label>
-                        <input type="text" name="text" placeholder="CONFIDENTIAL" value="WATERMARK">
-                    </div>
-                    <div class="option-group">
-                        <label>Opacity (0.1 - 1.0):</label>
-                        <input type="range" name="opacity" min="0.1" max="1" step="0.1" value="0.3">
-                    </div>
-                    {% elif tool_name == 'edit' %}
-                    <div class="option-group">
-                        <label>Text to add:</label>
-                        <textarea name="text" rows="4" placeholder="Enter the text you want to add to the PDF"></textarea>
-                    </div>
-                    <div class="option-group">
-                        <label>Position:</label>
-                        <div class="position-inputs">
-                            <input type="number" name="x" placeholder="X" value="100">
-                            <input type="number" name="y" placeholder="Y" value="100">
-                            <input type="number" name="page" placeholder="Page" value="1" min="1">
-                        </div>
-                    </div>
-                    {% endif %}
-                    
-                    <button type="submit" class="btn btn-primary btn-large" id="processBtn">
-                        <span class="btn-text">{{ title }}</span>
-                        <span class="btn-loading" style="display: none;">
-                            <svg class="spinner" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="30 70"/>
+                <div class="tool-info-card security-card">
+                    <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Your Privacy</h3>
+                    <p>Files are processed locally and automatically deleted after 5 minutes. We never store or share your data.</p>
+                </div>
+            </div>
+            
+            <div class="tool-main">
+                <div class="upload-area" id="uploadArea">
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="dropzone" id="dropzone">
+                            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                <polyline points="17 8 12 3 7 8"/>
+                                <line x1="12" y1="3" x2="12" y2="15"/>
                             </svg>
-                            Processing...
-                        </span>
-                    </button>
+                            <h3>Drop your files here</h3>
+                            <p>or click to browse</p>
+                            <input type="file" id="fileInput" name="files" accept="{{ accept }}" {% if multiple %}multiple{% endif %} hidden>
+                            <button type="button" class="btn btn-primary" id="browseBtn">Select Files</button>
+                        </div>
+                        
+                        <div class="file-list" id="fileList" style="display: none;">
+                            <h4>Selected Files:</h4>
+                            <ul id="selectedFiles"></ul>
+                        </div>
+                        
+                        <div class="tool-options" id="toolOptions" style="display: none;">
+                            {% if tool_name == 'split' %}
+                            <div class="option-group">
+                                <label>Split Type:</label>
+                                <select name="split_type" id="splitType">
+                                    <option value="all">Extract all pages</option>
+                                    <option value="range">Custom page ranges</option>
+                                </select>
+                            </div>
+                            <div class="option-group" id="pagesGroup" style="display: none;">
+                                <label>Pages (e.g., 1-3, 5, 7-10):</label>
+                                <input type="text" name="pages" placeholder="1-3, 5, 7-10">
+                            </div>
+                            {% elif tool_name == 'compress' %}
+                            <div class="option-group">
+                                <label>Quality:</label>
+                                <select name="quality">
+                                    <option value="high">High (Larger file)</option>
+                                    <option value="medium" selected>Medium (Balanced)</option>
+                                    <option value="low">Low (Smaller file)</option>
+                                </select>
+                            </div>
+                            {% elif tool_name == 'rotate' %}
+                            <div class="option-group">
+                                <label>Rotation:</label>
+                                <select name="angle">
+                                    <option value="90">90° Clockwise</option>
+                                    <option value="180">180°</option>
+                                    <option value="270">90° Counter-clockwise</option>
+                                </select>
+                            </div>
+                            <div class="option-group">
+                                <label>Apply to pages (leave empty for all):</label>
+                                <input type="text" name="pages" placeholder="e.g., 1-3, 5" value="all">
+                            </div>
+                            {% elif tool_name == 'crop' %}
+                            <div class="option-group">
+                                <label>Margins to crop (in points):</label>
+                                <div class="margin-inputs">
+                                    <input type="number" name="top" placeholder="Top" value="0" min="0">
+                                    <input type="number" name="right" placeholder="Right" value="0" min="0">
+                                    <input type="number" name="bottom" placeholder="Bottom" value="0" min="0">
+                                    <input type="number" name="left" placeholder="Left" value="0" min="0">
+                                </div>
+                            </div>
+                            {% elif tool_name == 'remove-pages' %}
+                            <div class="option-group">
+                                <label>Pages to remove:</label>
+                                <input type="text" name="pages" placeholder="e.g., 1, 3-5, 8" required>
+                            </div>
+                            {% elif tool_name == 'organize' %}
+                            <div class="option-group">
+                                <label>New page order (comma-separated):</label>
+                                <input type="text" name="order" placeholder="e.g., 3, 1, 2, 5, 4" required>
+                                <small>Enter page numbers in the desired order</small>
+                            </div>
+                            {% elif tool_name == 'pdf-to-jpg' %}
+                            <div class="option-group">
+                                <label>Image Quality (DPI):</label>
+                                <select name="dpi">
+                                    <option value="72">72 DPI (Low)</option>
+                                    <option value="150" selected>150 DPI (Medium)</option>
+                                    <option value="300">300 DPI (High)</option>
+                                </select>
+                            </div>
+                            {% elif tool_name == 'extract' %}
+                            <div class="option-group">
+                                <label>Extract:</label>
+                                <select name="extract_type">
+                                    <option value="text">Text</option>
+                                    <option value="images">Images</option>
+                                </select>
+                            </div>
+                            {% elif tool_name == 'ocr' %}
+                            <div class="option-group">
+                                <label>Language:</label>
+                                <select name="language">
+                                    <option value="eng" selected>English</option>
+                                    <option value="fra">French</option>
+                                    <option value="deu">German</option>
+                                    <option value="spa">Spanish</option>
+                                    <option value="ita">Italian</option>
+                                    <option value="por">Portuguese</option>
+                                </select>
+                            </div>
+                            {% elif tool_name == 'unlock' %}
+                            <div class="option-group">
+                                <label>PDF Password:</label>
+                                <input type="password" name="password" placeholder="Enter the PDF password">
+                            </div>
+                            {% elif tool_name == 'protect' %}
+                            <div class="option-group">
+                                <label>Set Password:</label>
+                                <input type="password" name="password" placeholder="Enter a strong password" required>
+                            </div>
+                            {% elif tool_name == 'sign' %}
+                            <div class="option-group">
+                                <label>Signature:</label>
+                                <div class="signature-area">
+                                    <canvas id="signatureCanvas" width="400" height="150"></canvas>
+                                    <div class="signature-buttons">
+                                        <button type="button" class="btn btn-secondary" id="clearSignature">Clear</button>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="signature" id="signatureData">
+                            </div>
+                            <div class="option-group">
+                                <label>Position:</label>
+                                <div class="position-inputs">
+                                    <input type="number" name="x" placeholder="X" value="100">
+                                    <input type="number" name="y" placeholder="Y" value="700">
+                                    <input type="number" name="page" placeholder="Page" value="1" min="1">
+                                </div>
+                            </div>
+                            {% elif tool_name == 'watermark' %}
+                            <div class="option-group">
+                                <label>Watermark Text:</label>
+                                <input type="text" name="text" placeholder="CONFIDENTIAL" value="WATERMARK">
+                            </div>
+                            <div class="option-group">
+                                <label>Opacity (0.1 - 1.0):</label>
+                                <input type="range" name="opacity" min="0.1" max="1" step="0.1" value="0.3">
+                            </div>
+                            {% elif tool_name == 'edit' %}
+                            <div class="option-group">
+                                <label>Text to add:</label>
+                                <textarea name="text" rows="4" placeholder="Enter the text you want to add to the PDF"></textarea>
+                            </div>
+                            <div class="option-group">
+                                <label>Position:</label>
+                                <div class="position-inputs">
+                                    <input type="number" name="x" placeholder="X" value="100">
+                                    <input type="number" name="y" placeholder="Y" value="100">
+                                    <input type="number" name="page" placeholder="Page" value="1" min="1">
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <button type="submit" class="btn btn-primary btn-large" id="processBtn">
+                                <span class="btn-text">{{ title }}</span>
+                                <span class="btn-loading" style="display: none;">
+                                    <svg class="spinner" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="30 70"/>
+                                    </svg>
+                                    Processing...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
-        
-        <div class="result-area" id="resultArea" style="display: none;">
-            <div class="success-message">
-                <svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-                <h2>Success!</h2>
-                <p id="resultMessage">Your file has been processed successfully.</p>
+                
+                <div class="result-area" id="resultArea" style="display: none;">
+                    <div class="success-message">
+                        <svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        <h2>Success!</h2>
+                        <p id="resultMessage">Your file has been processed successfully.</p>
+                    </div>
+                    <div class="download-buttons" id="downloadButtons"></div>
+                    <button class="btn btn-secondary" id="processAnother">Process Another File</button>
+                </div>
+                
+                <div class="error-area" id="errorArea" style="display: none;">
+                    <div class="error-message">
+                        <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                        <h2>Error</h2>
+                        <p id="errorMessage">Something went wrong.</p>
+                    </div>
+                    <button class="btn btn-primary" id="tryAgain">Try Again</button>
+                </div>
             </div>
-            <div class="download-buttons" id="downloadButtons">
-            </div>
-            <button class="btn btn-secondary" id="processAnother">Process Another File</button>
-        </div>
-        
-        <div class="error-area" id="errorArea" style="display: none;">
-            <div class="error-message">
-                <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
-                <h2>Error</h2>
-                <p id="errorMessage">Something went wrong.</p>
-            </div>
-            <button class="btn btn-primary" id="tryAgain">Try Again</button>
         </div>
     </div>
 </section>

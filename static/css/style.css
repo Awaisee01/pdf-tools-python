@@ -348,9 +348,129 @@ body {
     padding: 60px 0;
 }
 
+.tool-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+    align-items: start;
+}
+
+.tool-sidebar {
+    position: sticky;
+    top: 90px;
+}
+
+.tool-info-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+}
+
+.tool-info-card h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--text-color);
+}
+
+.tool-info-card h3 svg {
+    stroke: var(--primary-color);
+}
+
+.how-it-works {
+    list-style: none;
+}
+
+.how-it-works li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.how-it-works li:last-child {
+    border-bottom: none;
+}
+
+.how-it-works li span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: white;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.feature-list {
+    list-style: none;
+}
+
+.feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+.feature-list li svg {
+    flex-shrink: 0;
+}
+
+.security-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-left: 4px solid var(--primary-color);
+}
+
+.security-card p {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+.tool-main {
+    min-width: 0;
+}
+
+@media (max-width: 900px) {
+    .tool-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .tool-sidebar {
+        position: static;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+    
+    .tool-info-card {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 600px) {
+    .tool-sidebar {
+        grid-template-columns: 1fr;
+    }
+}
+
 .upload-area {
-    max-width: 700px;
-    margin: 0 auto;
+    max-width: 100%;
 }
 
 .dropzone {
