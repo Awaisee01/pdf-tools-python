@@ -37,10 +37,19 @@
                     <h4>Drop your {% if 'PDF' in title %}PDF{% elif 'Word' in title %}Word file{% elif 'Excel' in title %}Excel file{% elif 'PowerPoint' in title %}PowerPoint{% elif 'JPG' in title %}images{% else %}file{% endif %} here</h4>
                     <p>or click to browse files</p>
                     <input type="file" id="fileInput" name="files" accept="{{ accept }}" {% if multiple %}multiple{% endif %} hidden>
+                    <input type="file" id="addMoreInput" name="addFiles" accept="{{ accept }}" {% if multiple %}multiple{% endif %} hidden>
                     <button type="button" class="btn btn-select" id="browseBtn">Select {% if 'PDF' in title %}PDF{% elif 'Word' in title %}Word{% elif 'Excel' in title %}Excel{% elif 'PowerPoint' in title %}PPTX{% elif 'JPG' in title %}Images{% else %}File{% endif %}</button>
                 </div>
-                <div class="file-list" id="fileList" style="display: none;">
-                    <ul id="selectedFiles"></ul>
+                <div class="thumbnail-grid" id="thumbnailGrid" style="display: none;" data-multiple="{% if multiple %}true{% else %}false{% endif %}">
+                    <div class="thumbnails-container" id="thumbnailsContainer"></div>
+                    {% if multiple %}
+                    <button type="button" class="add-more-btn" id="addMoreBtn" title="Add more files">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
+                    {% endif %}
                 </div>
             </div>
             

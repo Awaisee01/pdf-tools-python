@@ -1,9 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     const dropzone = document.getElementById('dropzone') || document.querySelector('.upload-zone');
     const fileInput = document.getElementById('fileInput');
+    const addMoreInput = document.getElementById('addMoreInput');
     const browseBtn = document.getElementById('browseBtn');
-    const fileList = document.getElementById('fileList');
-    const selectedFiles = document.getElementById('selectedFiles');
+    const thumbnailGrid = document.getElementById('thumbnailGrid');
+    const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+    const addMoreBtn = document.getElementById('addMoreBtn');
     const uploadForm = document.getElementById('uploadForm');
     const processBtn = document.getElementById('processBtn');
     const resultArea = document.getElementById('resultArea');
@@ -16,12 +18,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const toolColumns = document.querySelector('.tool-columns');
     
     let files = [];
+    let draggedItem = null;
 
     if (browseBtn) {
         browseBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             if (fileInput) fileInput.click();
+        });
+    }
+
+    if (addMoreBtn) {
+        addMoreBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (addMoreInput) addMoreInput.click();
         });
     }
 
@@ -51,52 +62,195 @@ document.addEventListener('DOMContentLoaded', function() {
     if (fileInput) {
         fileInput.addEventListener('change', function() {
             handleFiles(this.files);
+            this.value = '';
+        });
+    }
+
+    if (addMoreInput) {
+        addMoreInput.addEventListener('change', function() {
+            addMoreFiles(this.files);
+            this.value = '';
         });
     }
 
     function handleFiles(newFiles) {
         files = Array.from(newFiles);
-        updateFileList();
+        updateThumbnailView();
     }
 
-    function updateFileList() {
-        if (!fileList || !selectedFiles) return;
+    function addMoreFiles(newFiles) {
+        files = files.concat(Array.from(newFiles));
+        updateThumbnailView();
+    }
+
+    function updateThumbnailView() {
+        if (!thumbnailGrid || !thumbnailsContainer) return;
         
         if (files.length === 0) {
-            fileList.style.display = 'none';
+            thumbnailGrid.style.display = 'none';
+            if (dropzone) dropzone.style.display = 'block';
             return;
         }
 
-        fileList.style.display = 'block';
-        selectedFiles.innerHTML = '';
+        if (dropzone) dropzone.style.display = 'none';
+        thumbnailGrid.style.display = 'flex';
+        thumbnailsContainer.innerHTML = '';
 
         files.forEach((file, index) => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <span class="file-name">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            const thumb = createThumbnail(file, index);
+            thumbnailsContainer.appendChild(thumb);
+        });
+
+        setupDragAndDrop();
+    }
+
+    function createThumbnail(file, index) {
+        const thumb = document.createElement('div');
+        thumb.className = 'thumbnail-item';
+        thumb.draggable = true;
+        thumb.dataset.index = index;
+
+        const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+        const isImage = file.type.startsWith('image/');
+        const isWord = file.name.toLowerCase().endsWith('.docx') || file.name.toLowerCase().endsWith('.doc');
+        const isExcel = file.name.toLowerCase().endsWith('.xlsx') || file.name.toLowerCase().endsWith('.xls');
+        const isPPT = file.name.toLowerCase().endsWith('.pptx') || file.name.toLowerCase().endsWith('.ppt');
+
+        let previewHTML = '';
+        
+        if (isImage) {
+            const url = URL.createObjectURL(file);
+            previewHTML = `<img src="${url}" alt="${file.name}" class="thumbnail-preview">`;
+        } else if (isPDF) {
+            previewHTML = `
+                <div class="thumbnail-icon pdf-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.5"/>
+                        <text x="12" y="16" text-anchor="middle" font-size="6" fill="currentColor" font-weight="bold">PDF</text>
+                    </svg>
+                </div>`;
+        } else if (isWord) {
+            previewHTML = `
+                <div class="thumbnail-icon word-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.5"/>
+                        <text x="12" y="16" text-anchor="middle" font-size="5" fill="currentColor" font-weight="bold">DOC</text>
+                    </svg>
+                </div>`;
+        } else if (isExcel) {
+            previewHTML = `
+                <div class="thumbnail-icon excel-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.5"/>
+                        <text x="12" y="16" text-anchor="middle" font-size="5" fill="currentColor" font-weight="bold">XLS</text>
+                    </svg>
+                </div>`;
+        } else if (isPPT) {
+            previewHTML = `
+                <div class="thumbnail-icon ppt-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="1.5"/>
+                        <polyline points="14 2 14 8 20 8" stroke="currentColor" stroke-width="1.5"/>
+                        <text x="12" y="16" text-anchor="middle" font-size="5" fill="currentColor" font-weight="bold">PPT</text>
+                    </svg>
+                </div>`;
+        } else {
+            previewHTML = `
+                <div class="thumbnail-icon file-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                         <polyline points="14 2 14 8 20 8"/>
                     </svg>
-                    ${file.name}
-                </span>
-                <span class="file-size">${formatFileSize(file.size)}</span>
-                <button type="button" class="remove-file" data-index="${index}">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                </div>`;
+        }
+
+        const fileName = file.name.length > 15 ? file.name.substring(0, 12) + '...' : file.name;
+
+        thumb.innerHTML = `
+            <div class="thumbnail-content">
+                ${previewHTML}
+                <button type="button" class="thumbnail-remove" data-index="${index}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
                 </button>
-            `;
-            selectedFiles.appendChild(li);
+            </div>
+            <span class="thumbnail-name" title="${file.name}">${fileName}</span>
+        `;
+
+        thumb.querySelector('.thumbnail-remove').addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const idx = parseInt(this.dataset.index);
+            files.splice(idx, 1);
+            updateThumbnailView();
         });
 
-        document.querySelectorAll('.remove-file').forEach(btn => {
-            btn.addEventListener('click', function(e) {
+        return thumb;
+    }
+
+    function setupDragAndDrop() {
+        const items = thumbnailsContainer.querySelectorAll('.thumbnail-item');
+        
+        items.forEach(item => {
+            item.addEventListener('dragstart', function(e) {
+                draggedItem = this;
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            item.addEventListener('dragend', function() {
+                this.classList.remove('dragging');
+                draggedItem = null;
+                thumbnailsContainer.querySelectorAll('.thumbnail-item').forEach(i => {
+                    i.classList.remove('drag-over');
+                });
+            });
+
+            item.addEventListener('dragover', function(e) {
                 e.preventDefault();
-                const index = parseInt(this.dataset.index);
-                files.splice(index, 1);
-                updateFileList();
+                e.dataTransfer.dropEffect = 'move';
+                if (this !== draggedItem) {
+                    this.classList.add('drag-over');
+                }
+            });
+
+            item.addEventListener('dragleave', function() {
+                this.classList.remove('drag-over');
+            });
+
+            item.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('drag-over');
+                
+                if (draggedItem && this !== draggedItem) {
+                    const fromIndex = parseInt(draggedItem.dataset.index);
+                    const toIndex = parseInt(this.dataset.index);
+                    const originalLength = files.length;
+                    const wasLastItem = toIndex === originalLength - 1;
+                    
+                    const movedFile = files.splice(fromIndex, 1)[0];
+                    
+                    let insertIndex;
+                    if (fromIndex < toIndex) {
+                        if (wasLastItem) {
+                            insertIndex = files.length;
+                        } else if (toIndex === fromIndex + 1) {
+                            insertIndex = toIndex;
+                        } else {
+                            insertIndex = toIndex - 1;
+                        }
+                    } else {
+                        insertIndex = toIndex;
+                    }
+                    
+                    files.splice(insertIndex, 0, movedFile);
+                    updateThumbnailView();
+                }
             });
         });
     }
@@ -117,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const inputs = uploadForm.querySelectorAll('input, select, textarea');
             inputs.forEach(input => {
-                if (input.name && input.name !== 'files' && input.type !== 'file') {
+                if (input.name && input.name !== 'files' && input.name !== 'addFiles' && input.type !== 'file') {
                     if (input.type === 'radio') {
                         if (input.checked) {
                             formData.append(input.name, input.value);
@@ -216,7 +370,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetForm() {
         files = [];
         if (fileInput) fileInput.value = '';
-        updateFileList();
+        if (addMoreInput) addMoreInput.value = '';
+        if (thumbnailGrid) thumbnailGrid.style.display = 'none';
+        if (thumbnailsContainer) thumbnailsContainer.innerHTML = '';
+        if (dropzone) dropzone.style.display = 'block';
         if (toolColumns) toolColumns.style.display = 'grid';
         if (resultArea) resultArea.style.display = 'none';
         if (errorArea) errorArea.style.display = 'none';
