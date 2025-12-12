@@ -3255,6 +3255,17 @@ input[type="range"]::-webkit-slider-thumb {
     cursor: move;
     display: none;
     box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+    z-index: 10;
+}
+
+.crop-selection .crop-drag-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    cursor: move;
 }
 
 .crop-handle {
@@ -3264,6 +3275,8 @@ input[type="range"]::-webkit-slider-thumb {
     background: white;
     border: 2px solid #e74c3c;
     border-radius: 2px;
+    z-index: 20;
+    pointer-events: auto;
 }
 
 .crop-handle.top-left {

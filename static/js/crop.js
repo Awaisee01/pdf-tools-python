@@ -265,11 +265,11 @@ document.addEventListener('DOMContentLoaded', function() {
             activeHandle = e.target.className.replace('crop-handle ', '');
             startRect = { ...cropRect };
             e.preventDefault();
-        } else if (e.target === cropSelection || cropSelection.contains(e.target)) {
+        } else if (e.target.id === 'cropDragArea' || e.target.id === 'cropSelection') {
             isDragging = true;
             startRect = { ...cropRect };
             e.preventDefault();
-        } else {
+        } else if (e.target === cropOverlay || e.target === pdfCanvas) {
             isDrawing = true;
             cropRect = {
                 x: startX,
