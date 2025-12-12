@@ -2,6 +2,7 @@ import fitz
 import json
 import base64
 from io import BytesIO
+from PIL import Image
 
 def extract_text_blocks(input_path):
     """Extract text blocks with their positions from a PDF."""
@@ -54,13 +55,20 @@ def extract_text_blocks(input_path):
     except Exception as e:
         return {"success": False, "error": str(e)}
 
+def hex_to_rgb(hex_color):
+    """Convert hex color to RGB tuple (0-1 range)."""
+    hex_color = hex_color.lstrip('#')
+    if len(hex_color) == 6:
+        r = int(hex_color[0:2], 16) / 255
+        g = int(hex_color[2:4], 16) / 255
+        b = int(hex_color[4:6], 16) / 255
+        return (r, g, b)
+    return (0, 0, 0)
+
 def edit_pdf(input_path, output_path, edits):
     """
     Apply edits to a PDF.
-    edits is a list of edit operations:
-    - {"type": "modify", "page": 1, "original_rect": [x,y,w,h], "new_text": "...", "font_size": 12}
-    - {"type": "add", "page": 1, "x": 100, "y": 100, "text": "...", "font_size": 12}
-    - {"type": "delete", "page": 1, "rect": [x,y,w,h]}
+    Supports: text, image, signature, whiteout, shape, modify, add, delete
     """
     try:
         pdf = fitz.open(input_path)
@@ -73,7 +81,67 @@ def edit_pdf(input_path, output_path, edits):
             page = pdf[page_num]
             edit_type = edit.get('type', 'add')
             
-            if edit_type == 'modify':
+            if edit_type == 'text':
+                x = edit.get('x', 100)
+                y = edit.get('y', 100)
+                content = edit.get('content', '')
+                font_size = edit.get('fontSize', 14)
+                color = edit.get('color', '#000000')
+                
+                if isinstance(color, str):
+                    color = hex_to_rgb(color)
+                elif isinstance(color, list):
+                    color = tuple(c if c <= 1 else c/255 for c in color)
+                
+                if content:
+                    text_point = fitz.Point(x, y + font_size)
+                    page.insert_text(text_point, content, fontsize=font_size,
+                                   fontname="helv", color=color)
+            
+            elif edit_type in ('image', 'signature'):
+                x = edit.get('x', 100)
+                y = edit.get('y', 100)
+                width = edit.get('width', 150)
+                height = edit.get('height', 100)
+                data = edit.get('data', '')
+                
+                if data and data.startswith('data:'):
+                    base64_data = data.split(',')[1] if ',' in data else data
+                    img_bytes = base64.b64decode(base64_data)
+                    
+                    img_rect = fitz.Rect(x, y, x + width, y + height)
+                    page.insert_image(img_rect, stream=img_bytes)
+            
+            elif edit_type == 'whiteout':
+                x = edit.get('x', 0)
+                y = edit.get('y', 0)
+                width = edit.get('width', 100)
+                height = edit.get('height', 20)
+                
+                rect = fitz.Rect(x, y, x + width, y + height)
+                page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
+            
+            elif edit_type == 'shape':
+                x = edit.get('x', 0)
+                y = edit.get('y', 0)
+                width = edit.get('width', 100)
+                height = edit.get('height', 100)
+                shape_type = edit.get('shape', 'rectangle')
+                color = edit.get('color', '#000000')
+                
+                if isinstance(color, str):
+                    color = hex_to_rgb(color)
+                
+                rect = fitz.Rect(x, y, x + width, y + height)
+                
+                if shape_type == 'circle':
+                    center = fitz.Point(x + width/2, y + height/2)
+                    radius = min(width, height) / 2
+                    page.draw_circle(center, radius, color=color, width=2)
+                else:
+                    page.draw_rect(rect, color=color, width=2)
+            
+            elif edit_type == 'modify':
                 rect = edit.get('original_rect', [0, 0, 100, 20])
                 fitz_rect = fitz.Rect(rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])
                 
