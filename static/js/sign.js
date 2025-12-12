@@ -33,6 +33,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const signatureUploadZone = document.getElementById('signatureUploadZone');
     const signatureFileInput = document.getElementById('signatureFileInput');
     const uploadedSignaturePreview = document.getElementById('uploadedSignaturePreview');
+    const zoomInBtn = document.getElementById('zoomIn');
+    const zoomOutBtn = document.getElementById('zoomOut');
+    const zoomFitBtn = document.getElementById('zoomFit');
+    const zoomLevelSpan = document.getElementById('zoomLevel');
 
     let pdfDoc = null;
     let currentPage = 1;
@@ -46,6 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let isDrawing = false;
     let drawCtx = null;
     let pdfScale = 1;
+    let baseScale = 1;
+    let zoomFactor = 1;
     let canvasOffsetX = 0;
     let canvasOffsetY = 0;
 
@@ -127,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    async function renderPage(pageNum) {
+    async function renderPage(pageNum, preserveZoom = false) {
         const page = await pdfDoc.getPage(pageNum);
         const container = document.getElementById('pdfCanvasContainer');
         const maxWidth = container.clientWidth - 40 || 600;
@@ -136,8 +142,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const viewport = page.getViewport({ scale: 1 });
         const scaleX = maxWidth > 0 ? maxWidth / viewport.width : 1;
         const scaleY = maxHeight > 0 ? maxHeight / viewport.height : 1;
-        pdfScale = Math.min(scaleX, scaleY, 1.5);
-        if (pdfScale <= 0.1) pdfScale = 1;
+        baseScale = Math.min(scaleX, scaleY, 1.5);
+        if (baseScale <= 0.1) baseScale = 1;
+        
+        if (!preserveZoom) {
+            zoomFactor = 1;
+            updateZoomLevel();
+        }
+        
+        pdfScale = baseScale * zoomFactor;
         
         const scaledViewport = page.getViewport({ scale: pdfScale });
 
@@ -149,6 +162,38 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.getElementById('signaturePage').value = pageNum;
     }
+    
+    function updateZoomLevel() {
+        if (zoomLevelSpan) {
+            zoomLevelSpan.textContent = Math.round(zoomFactor * 100) + '%';
+        }
+    }
+    
+    async function zoomIn() {
+        if (zoomFactor < 3) {
+            zoomFactor = Math.min(zoomFactor + 0.25, 3);
+            updateZoomLevel();
+            await renderPage(currentPage, true);
+        }
+    }
+    
+    async function zoomOut() {
+        if (zoomFactor > 0.5) {
+            zoomFactor = Math.max(zoomFactor - 0.25, 0.5);
+            updateZoomLevel();
+            await renderPage(currentPage, true);
+        }
+    }
+    
+    async function zoomFit() {
+        zoomFactor = 1;
+        updateZoomLevel();
+        await renderPage(currentPage, true);
+    }
+    
+    if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
+    if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
+    if (zoomFitBtn) zoomFitBtn.addEventListener('click', zoomFit);
 
     function updatePageNavigation() {
         pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
@@ -572,6 +617,8 @@ document.addEventListener('DOMContentLoaded', function() {
         uploadedFile = null;
         signatureData = null;
         signatureElement = null;
+        zoomFactor = 1;
+        updateZoomLevel();
 
         pageThumbnails.innerHTML = '';
         signatureOverlay.innerHTML = '';
