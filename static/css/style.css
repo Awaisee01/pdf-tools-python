@@ -1824,6 +1824,10 @@ input[type="range"]::-webkit-slider-thumb {
     background: var(--white);
     box-shadow: var(--shadow);
     max-width: 100%;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .pdf-canvas-container canvas {

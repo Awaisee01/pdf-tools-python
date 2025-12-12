@@ -130,13 +130,14 @@ document.addEventListener('DOMContentLoaded', function() {
     async function renderPage(pageNum) {
         const page = await pdfDoc.getPage(pageNum);
         const container = document.getElementById('pdfCanvasContainer');
-        const maxWidth = container.clientWidth - 40;
-        const maxHeight = container.clientHeight - 40;
+        const maxWidth = container.clientWidth - 40 || 600;
+        const maxHeight = container.clientHeight - 40 || window.innerHeight * 0.7;
         
         const viewport = page.getViewport({ scale: 1 });
-        const scaleX = maxWidth / viewport.width;
-        const scaleY = maxHeight / viewport.height;
+        const scaleX = maxWidth > 0 ? maxWidth / viewport.width : 1;
+        const scaleY = maxHeight > 0 ? maxHeight / viewport.height : 1;
         pdfScale = Math.min(scaleX, scaleY, 1.5);
+        if (pdfScale <= 0.1) pdfScale = 1;
         
         const scaledViewport = page.getViewport({ scale: pdfScale });
 
