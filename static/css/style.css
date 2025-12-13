@@ -207,41 +207,82 @@ body {
 
 .mega-dropdown-grid {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 30px;
+    grid-template-columns: repeat(6, minmax(150px, 1fr));
+    gap: 24px;
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .mega-col h4 {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    color: #666;
-    letter-spacing: 0.5px;
-    margin-bottom: 15px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #eee;
+    color: #888;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f0f0f0;
 }
 
-.mega-col a {
+.mega-tool-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mega-tool-list li {
+    margin-bottom: 2px;
+}
+
+.mega-tool-list a {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 0;
-    color: var(--text-color);
+    padding: 8px 6px;
+    color: #333;
     text-decoration: none;
-    font-size: 0.9rem;
-    transition: var(--transition);
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.2s ease;
 }
 
-.mega-col a:hover {
-    color: var(--primary-color);
-    transform: translateX(3px);
+.mega-tool-list a:hover {
+    background: #f8f9fa;
+    color: #1a1a1a;
+    transform: translateX(2px);
 }
 
-.mega-col .tool-icon {
-    font-size: 0.8rem;
+.mega-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
+
+.mega-icon[data-color="red"] { background: #e74c3c; }
+.mega-icon[data-color="pink"] { background: #ec407a; }
+.mega-icon[data-color="orange"] { background: #ff7043; }
+.mega-icon[data-color="brown"] { background: #8d6e63; }
+.mega-icon[data-color="rose"] { background: #f48fb1; }
+.mega-icon[data-color="green"] { background: #4caf50; }
+.mega-icon[data-color="teal"] { background: #009688; }
+.mega-icon[data-color="yellow"] { background: #ffc107; }
+.mega-icon[data-color="blue"] { background: #2196f3; }
+.mega-icon[data-color="coral"] { background: #ff7043; }
+.mega-icon[data-color="emerald"] { background: #10b981; }
+.mega-icon[data-color="magenta"] { background: #e91e63; }
+.mega-icon[data-color="sky"] { background: #03a9f4; }
+.mega-icon[data-color="purple"] { background: #9c27b0; }
+.mega-icon[data-color="cyan"] { background: #00bcd4; }
+.mega-icon[data-color="amber"] { background: #ffa000; }
+.mega-icon[data-color="lime"] { background: #8bc34a; }
+.mega-icon[data-color="gold"] { background: #ffb300; }
+.mega-icon[data-color="crimson"] { background: #dc3545; }
+.mega-icon[data-color="indigo"] { background: #3f51b5; }
 
 @media (max-width: 1200px) {
     .mega-dropdown-grid {
