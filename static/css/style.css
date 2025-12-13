@@ -3270,6 +3270,11 @@ input[type="range"]::-webkit-slider-thumb {
     width: 100%;
 }
 
+.crop-preview .pdf-canvas-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
 .crop-overlay {
     position: absolute;
     top: 0;
