@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Rotate PDF - RemakePdf{% endblock %}
+
+{% block content %}
+<section class="tool-page advanced-tool">
+    <div class="container">
+        <a href="/" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Back to All Tools
+        </a>
+        
+        <div class="initial-upload-area" id="initialUpload">
+            <div class="tool-title">
+                <h1>Rotate PDF</h1>
+                <p>Rotate PDF pages to any angle</p>
+            </div>
+            
+            <div class="upload-card-centered">
+                <div class="upload-zone" id="dropzone">
+                    <div class="upload-icon-wrapper">
+                        <svg class="upload-box-icon" viewBox="0 0 64 64" fill="none">
+                            <path d="M52 24v28a4 4 0 01-4 4H16a4 4 0 01-4-4V24" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M8 24l24-16 24 16" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M32 24v20" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M24 36l8 8 8-8" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h4>Drop your PDF here</h4>
+                    <p>or click to browse files</p>
+                    <input type="file" id="fileInput" name="files" accept=".pdf" hidden>
+                    <button type="button" class="btn btn-select" id="browseBtn">Select PDF</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="advanced-tool-layout rotate-layout" id="rotateToolLayout" style="display: none;">
+            <div class="rotate-pages-area">
+                <div class="rotate-pages-grid" id="rotatePagesGrid"></div>
+                <button type="button" class="add-more-btn-floating" id="addMoreBtn" title="Add more files">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <input type="file" id="addMoreInput" name="addFiles" accept=".pdf" hidden>
+            </div>
+            
+            <div class="rotate-options-panel">
+                <h2>Rotate PDF</h2>
+                <p class="rotate-instruction">Mouse over PDF page below and a rotate icon will appear, click on the arrows to rotate PDFs.</p>
+                
+                <a href="#" class="reset-link" id="resetRotation">Reset all</a>
+                
+                <div class="rotation-section">
+                    <label class="section-label">ROTATION</label>
+                    <div class="rotation-buttons">
+                        <button type="button" class="rotation-btn" id="rotateRightBtn" data-angle="90">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M23 4v6h-6"></path>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                            <span>RIGHT</span>
+                        </button>
+                        <button type="button" class="rotation-btn" id="rotateLeftBtn" data-angle="270">
+                            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 4v6h6"></path>
+                                <path d="M3.51 15a9 9 0 1 0 2.12-9.36L1 10"></path>
+                            </svg>
+                            <span>LEFT</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <form id="rotateForm" enctype="multipart/form-data">
+                    <input type="hidden" name="rotations" id="rotationsInput" value="{}">
+                    <button type="submit" class="btn btn-rotate">
+                        Rotate PDF
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 8 16 12 12 16"></polyline>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="result-area" id="resultArea" style="display: none;">
+            <div class="result-card">
+                <svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <h2>Success!</h2>
+                <p id="resultMessage">Your PDF has been rotated successfully.</p>
+                <div class="download-buttons" id="downloadButtons"></div>
+                <button class="btn btn-secondary" id="processAnother">Rotate Another PDF</button>
+            </div>
+        </div>
+        
+        <div class="error-area" id="errorArea" style="display: none;">
+            <div class="error-card">
+                <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <h2>Error</h2>
+                <p id="errorMessage">Something went wrong.</p>
+                <button class="btn btn-primary" id="tryAgain">Try Again</button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+<script src="{{ url_for('static', filename='js/rotate.js') }}"></script>
+{% endblock %}

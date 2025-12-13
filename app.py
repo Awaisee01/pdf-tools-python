@@ -186,6 +186,8 @@ def tool_page(tool_name):
         return render_template('tool_merge.html', tool_name=tool_name, **info)
     elif tool_name == 'crop':
         return render_template('tool_crop.html', tool_name=tool_name, **info)
+    elif tool_name == 'rotate':
+        return render_template('tool_rotate.html', tool_name=tool_name, **info)
     
     return render_template('tool.html', tool_name=tool_name, **info)
 
@@ -235,11 +237,19 @@ def process_tool(tool_name):
             result = compress_pdf(saved_files[0], output_path, quality)
         
         elif tool_name == 'rotate':
+            import json
+            rotations_json = request.form.get('rotations', '')
             angle = int(request.form.get('angle', 90))
             pages = request.form.get('pages', 'all')
             output_filename = 'rotated.pdf'
             output_path = os.path.join(PROCESSED_FOLDER, generate_unique_filename(output_filename))
-            result = rotate_pdf(saved_files[0], output_path, angle, pages)
+            rotations = None
+            if rotations_json:
+                try:
+                    rotations = json.loads(rotations_json)
+                except:
+                    rotations = None
+            result = rotate_pdf(saved_files[0], output_path, angle, pages, rotations)
         
         elif tool_name == 'crop':
             margins = {

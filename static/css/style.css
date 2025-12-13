@@ -3534,6 +3534,272 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 /* ========================================
+   ROTATE PDF TOOL STYLES
+   ======================================== */
+
+.rotate-layout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 30px;
+    min-height: 70vh;
+}
+
+.rotate-pages-area {
+    background: #f8f9fa;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    position: relative;
+    overflow: auto;
+    max-height: 75vh;
+}
+
+.rotate-pages-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+}
+
+.rotate-page-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.rotate-page-item.selected .rotate-thumbnail-wrapper {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.rotate-thumbnail-wrapper {
+    position: relative;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: var(--radius-sm);
+    padding: 10px;
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.rotate-thumbnail-wrapper:hover {
+    border-color: #bbb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.rotate-thumbnail-wrapper:hover .rotate-overlay-controls {
+    opacity: 1;
+}
+
+.rotate-page-canvas {
+    display: block;
+    max-width: 120px;
+    max-height: 160px;
+    transition: transform 0.3s ease;
+}
+
+.rotate-overlay-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.rotate-arrow {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.rotate-arrow:hover {
+    background: #f0f0f0;
+    transform: scale(1.1);
+}
+
+.rotate-arrow svg {
+    color: #333;
+}
+
+.rotate-page-number {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--primary-color);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.rotate-page-label {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-align: center;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.add-more-btn-floating {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    transition: var(--transition);
+}
+
+.add-more-btn-floating:hover {
+    transform: scale(1.1);
+}
+
+.add-more-btn-floating svg {
+    width: 24px;
+    height: 24px;
+}
+
+.rotate-options-panel {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.rotate-options-panel h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.rotate-instruction {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+.rotation-section {
+    margin-bottom: 30px;
+}
+
+.rotation-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.rotation-btn {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: #fff5f5;
+    border: 1px solid #fecaca;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.rotation-btn:hover {
+    background: #fee2e2;
+    border-color: #fca5a5;
+}
+
+.rotation-btn svg {
+    color: #ef4444;
+}
+
+.rotation-btn span {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.btn-rotate {
+    width: 100%;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: var(--transition);
+    margin-top: auto;
+}
+
+.btn-rotate:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+}
+
+.btn-rotate:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-rotate svg {
+    width: 20px;
+    height: 20px;
+}
+
+@media (max-width: 900px) {
+    .rotate-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .rotate-options-panel {
+        order: -1;
+    }
+    
+    .rotate-pages-area {
+        max-height: 50vh;
+    }
+}
+
+/* ========================================
    PDF EDITOR - PROFESSIONAL TOOLBAR STYLES
    ======================================== */
 

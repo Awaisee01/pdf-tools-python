@@ -1,26 +1,33 @@
 import fitz
 
-def rotate_pdf(input_path, output_path, angle=90, pages='all'):
+def rotate_pdf(input_path, output_path, angle=90, pages='all', rotations=None):
     try:
         pdf = fitz.open(input_path)
         total_pages = len(pdf)
         
-        if pages == 'all':
-            page_list = list(range(total_pages))
+        if rotations:
+            for page_str, rotation_angle in rotations.items():
+                page_num = int(page_str) - 1
+                if 0 <= page_num < total_pages:
+                    page = pdf[page_num]
+                    page.set_rotation(page.rotation + rotation_angle)
         else:
-            page_list = []
-            for p in pages.split(','):
-                p = p.strip()
-                if '-' in p:
-                    start, end = map(int, p.split('-'))
-                    page_list.extend(range(start-1, end))
-                else:
-                    page_list.append(int(p) - 1)
-        
-        for page_num in page_list:
-            if 0 <= page_num < total_pages:
-                page = pdf[page_num]
-                page.set_rotation(page.rotation + angle)
+            if pages == 'all':
+                page_list = list(range(total_pages))
+            else:
+                page_list = []
+                for p in pages.split(','):
+                    p = p.strip()
+                    if '-' in p:
+                        start, end = map(int, p.split('-'))
+                        page_list.extend(range(start-1, end))
+                    else:
+                        page_list.append(int(p) - 1)
+            
+            for page_num in page_list:
+                if 0 <= page_num < total_pages:
+                    page = pdf[page_num]
+                    page.set_rotation(page.rotation + angle)
         
         pdf.save(output_path)
         pdf.close()
