@@ -5,6 +5,13 @@ A comprehensive PDF toolkit web application built with Python Flask and local li
 ## Overview
 This is a fully functional PDF tool website with 20+ tools for manipulating, converting, and editing PDF files. All processing happens locally on the server without using any external APIs.
 
+## VPS Deployment
+Project is ready for VPS deployment with:
+- requirements.txt - Python dependencies
+- wsgi.py - WSGI entry point
+- run_production.sh - Gunicorn startup script
+- DEPLOYMENT.md - Complete deployment guide with Nginx, systemd, SSL setup
+
 ## Features
 - **Merge PDF**: Combine multiple PDFs into one
 - **Split PDF**: Separate PDF pages
