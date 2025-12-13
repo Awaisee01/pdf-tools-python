@@ -18,6 +18,24 @@ def pdf_to_jpg(input_path, output_folder, dpi=150):
         
         pdf.close()
         folder_id = output_folder.split('/')[-1]
-        return {'success': True, 'output_folder': folder_id, 'files': output_files, 'is_folder': True}
+        
+        if len(output_files) == 1:
+            filename = os.path.basename(output_files[0])
+            return {
+                'success': True, 
+                'output_path': output_files[0],
+                'filename': filename,
+                'files': output_files, 
+                'is_folder': False,
+                'file_count': 1
+            }
+        else:
+            return {
+                'success': True, 
+                'output_folder': folder_id, 
+                'files': output_files, 
+                'is_folder': True,
+                'file_count': len(output_files)
+            }
     except Exception as e:
         return {'success': False, 'error': str(e)}

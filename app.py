@@ -271,7 +271,16 @@ def process_tool(tool_name):
             output_folder = os.path.join(PROCESSED_FOLDER, str(uuid.uuid4())[:8])
             os.makedirs(output_folder, exist_ok=True)
             result = pdf_to_jpg(saved_files[0], output_folder, dpi)
-            cleanup_folder(output_folder)
+            if result.get('success') and not result.get('is_folder'):
+                unique_jpg_name = generate_unique_filename('converted.jpg')
+                new_path = os.path.join(PROCESSED_FOLDER, unique_jpg_name)
+                shutil.move(result['output_path'], new_path)
+                shutil.rmtree(output_folder, ignore_errors=True)
+                result['filename'] = unique_jpg_name
+                result['output_path'] = new_path
+                cleanup_file(new_path)
+            else:
+                cleanup_folder(output_folder)
         
         elif tool_name == 'jpg-to-pdf':
             output_filename = 'images.pdf'
