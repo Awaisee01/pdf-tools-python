@@ -262,7 +262,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (e.target.classList.contains('crop-handle')) {
             isResizing = true;
-            activeHandle = e.target.className.replace('crop-handle ', '');
+            const handleTypes = ['top-left', 'top-right', 'bottom-left', 'bottom-right', 'top-center', 'bottom-center', 'left-center', 'right-center'];
+            activeHandle = handleTypes.find(h => e.target.classList.contains(h)) || '';
             startRect = { ...cropRect };
             e.preventDefault();
         } else if (e.target.id === 'cropDragArea' || e.target.id === 'cropSelection') {
