@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}All PDF Tools - RemakePdf{% endblock %}
+
+{% block content %}
+<section class="all-tools-hero">
+    <div class="container">
+        <h1>All PDF Tools</h1>
+        <p>Everything you need to work with PDFs in one place</p>
+    </div>
+</section>
+
+<section class="all-tools-page">
+    <div class="container">
+        <div class="tools-mega-grid">
+            <div class="tools-category">
+                <h3>ORGANIZE PDF</h3>
+                <ul class="tools-list">
+                    <li>
+                        <a href="/tool/merge">
+                            <span class="tool-chip" style="background: #e74c3c;"></span>
+                            <span class="tool-name">Merge PDF</span>
+                            <span class="tool-desc">Combine multiple PDFs into one</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/split">
+                            <span class="tool-chip" style="background: #ec407a;"></span>
+                            <span class="tool-name">Split PDF</span>
+                            <span class="tool-desc">Separate PDF pages</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/remove-pages">
+                            <span class="tool-chip" style="background: #ff7043;"></span>
+                            <span class="tool-name">Remove Pages</span>
+                            <span class="tool-desc">Delete specific pages</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/extract">
+                            <span class="tool-chip" style="background: #8d6e63;"></span>
+                            <span class="tool-name">Extract Pages</span>
+                            <span class="tool-desc">Extract content from PDF</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/organize">
+                            <span class="tool-chip" style="background: #f48fb1;"></span>
+                            <span class="tool-name">Organize PDF</span>
+                            <span class="tool-desc">Reorder PDF pages</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tools-category">
+                <h3>OPTIMIZE PDF</h3>
+                <ul class="tools-list">
+                    <li>
+                        <a href="/tool/compress">
+                            <span class="tool-chip" style="background: #4caf50;"></span>
+                            <span class="tool-name">Compress PDF</span>
+                            <span class="tool-desc">Reduce file size</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/ocr">
+                            <span class="tool-chip" style="background: #009688;"></span>
+                            <span class="tool-name">OCR PDF</span>
+                            <span class="tool-desc">Extract text from scanned PDFs</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tools-category">
+                <h3>CONVERT TO PDF</h3>
+                <ul class="tools-list">
+                    <li>
+                        <a href="/tool/jpg-to-pdf">
+                            <span class="tool-chip" style="background: #ffc107;"></span>
+                            <span class="tool-name">JPG to PDF</span>
+                            <span class="tool-desc">Convert images to PDF</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/word-to-pdf">
+                            <span class="tool-chip" style="background: #2196f3;"></span>
+                            <span class="tool-name">WORD to PDF</span>
+                            <span class="tool-desc">Convert Word documents</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/pptx-to-pdf">
+                            <span class="tool-chip" style="background: #ff7043;"></span>
+                            <span class="tool-name">POWERPOINT to PDF</span>
+                            <span class="tool-desc">Convert presentations</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/excel-to-pdf">
+                            <span class="tool-chip" style="background: #10b981;"></span>
+                            <span class="tool-name">EXCEL to PDF</span>
+                            <span class="tool-desc">Convert spreadsheets</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tools-category">
+                <h3>CONVERT FROM PDF</h3>
+                <ul class="tools-list">
+                    <li>
+                        <a href="/tool/pdf-to-jpg">
+                            <span class="tool-chip" style="background: #e91e63;"></span>
+                            <span class="tool-name">PDF to JPG</span>
+                            <span class="tool-desc">Convert PDF to images</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/pdf-to-word">
+                            <span class="tool-chip" style="background: #03a9f4;"></span>
+                            <span class="tool-name">PDF to WORD</span>
+                            <span class="tool-desc">Convert PDF to Word</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tools-category">
+                <h3>EDIT PDF</h3>
+                <ul class="tools-list">
+                    <li>
+                        <a href="/tool/rotate">
+                            <span class="tool-chip" style="background: #9c27b0;"></span>
+                            <span class="tool-name">Rotate PDF</span>
+                            <span class="tool-desc">Rotate PDF pages</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/watermark">
+                            <span class="tool-chip" style="background: #00bcd4;"></span>
+                            <span class="tool-name">Add Watermark</span>
+                            <span class="tool-desc">Add watermark to PDF</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/crop">
+                            <span class="tool-chip" style="background: #ffa000;"></span>
+                            <span class="tool-name">Crop PDF</span>
+                            <span class="tool-desc">Remove margins</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/edit">
+                            <span class="tool-chip" style="background: #8bc34a;"></span>
+                            <span class="tool-name">Edit PDF</span>
+                            <span class="tool-desc">Add text and images</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="tools-category">
+                <h3>PDF SECURITY</h3>
+                <ul class="tools-list">
+                    <li>
+                        <a href="/tool/unlock">
+                            <span class="tool-chip" style="background: #ffb300;"></span>
+                            <span class="tool-name">Unlock PDF</span>
+                            <span class="tool-desc">Remove password protection</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/protect">
+                            <span class="tool-chip" style="background: #dc3545;"></span>
+                            <span class="tool-name">Protect PDF</span>
+                            <span class="tool-desc">Add password protection</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/tool/sign">
+                            <span class="tool-chip" style="background: #3f51b5;"></span>
+                            <span class="tool-name">Sign PDF</span>
+                            <span class="tool-desc">Add signature to PDF</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
