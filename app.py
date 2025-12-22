@@ -27,6 +27,7 @@ from tools.protect_pdf import protect_pdf
 from tools.sign_pdf import sign_pdf
 from tools.watermark_pdf import watermark_pdf
 from tools.edit_pdf import edit_pdf, extract_text_blocks
+from content.tool_articles import get_article
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SESSION_SECRET', 'dev-secret-key-change-in-production')
@@ -177,23 +178,24 @@ def tool_page(tool_name):
         return redirect(url_for('index'))
     
     info = tool_info[tool_name]
+    article = get_article(tool_name)
     
     if tool_name == 'split':
-        return render_template('tool_split.html', tool_name=tool_name, **info)
+        return render_template('tool_split.html', tool_name=tool_name, article=article, **info)
     elif tool_name == 'sign':
-        return render_template('tool_sign.html', tool_name=tool_name, **info)
+        return render_template('tool_sign.html', tool_name=tool_name, article=article, **info)
     elif tool_name == 'edit':
-        return render_template('tool_edit.html', tool_name=tool_name, **info)
+        return render_template('tool_edit.html', tool_name=tool_name, article=article, **info)
     elif tool_name == 'organize':
-        return render_template('tool_organize.html', tool_name=tool_name, **info)
+        return render_template('tool_organize.html', tool_name=tool_name, article=article, **info)
     elif tool_name == 'merge':
-        return render_template('tool_merge.html', tool_name=tool_name, **info)
+        return render_template('tool_merge.html', tool_name=tool_name, article=article, **info)
     elif tool_name == 'crop':
-        return render_template('tool_crop.html', tool_name=tool_name, **info)
+        return render_template('tool_crop.html', tool_name=tool_name, article=article, **info)
     elif tool_name == 'rotate':
-        return render_template('tool_rotate.html', tool_name=tool_name, **info)
+        return render_template('tool_rotate.html', tool_name=tool_name, article=article, **info)
     
-    return render_template('tool.html', tool_name=tool_name, **info)
+    return render_template('tool.html', tool_name=tool_name, article=article, **info)
 
 @app.route('/process/<tool_name>', methods=['POST'])
 def process_tool(tool_name):

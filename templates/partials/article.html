@@ -1,0 +1,68 @@
+{% if article %}
+<section class="tool-article">
+    <div class="container">
+        <article class="article-content">
+            <h2>{{ article.title }}</h2>
+            <p class="article-intro">{{ article.intro }}</p>
+            
+            <div class="article-section">
+                <h3>Key Features</h3>
+                <div class="features-grid-article">
+                    {% for feature in article.features %}
+                    <div class="feature-item">
+                        <div class="feature-icon-small" style="background: {{ color }};">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div>
+                            <strong>{{ feature.title }}</strong>
+                            <p>{{ feature.desc }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="article-section">
+                <h3>How to {{ title }}</h3>
+                <ol class="how-to-list">
+                    {% for step in article.how_to %}
+                    <li>
+                        <span class="step-number">{{ loop.index }}</span>
+                        <span class="step-text">{{ step }}</span>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </div>
+            
+            <div class="article-section">
+                <h3>Common Use Cases</h3>
+                <ul class="use-cases-list">
+                    {% for use_case in article.use_cases %}
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{ color }}" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        {{ use_case }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="article-section faq-section">
+                <h3>Frequently Asked Questions</h3>
+                <div class="faq-list">
+                    {% for faq in article.faqs %}
+                    <div class="faq-item">
+                        <button class="faq-question" onclick="this.parentElement.classList.toggle('open')">
+                            <span>{{ faq.q }}</span>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="faq-answer">
+                            <p>{{ faq.a }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </article>
+    </div>
+</section>
+{% endif %}

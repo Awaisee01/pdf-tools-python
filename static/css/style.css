@@ -4883,3 +4883,236 @@ input[type="range"]::-webkit-slider-thumb {
         grid-template-columns: 1fr;
     }
 }
+
+/* Tool Article Styles */
+.tool-article {
+    background: #fff;
+    padding: 60px 0 80px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.article-content {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.article-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 20px;
+    line-height: 1.3;
+}
+
+.article-intro {
+    font-size: 1.1rem;
+    color: #475569;
+    line-height: 1.8;
+    margin-bottom: 40px;
+}
+
+.article-section {
+    margin-bottom: 50px;
+}
+
+.article-section h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 24px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.features-grid-article {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.feature-item {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+    background: #f1f5f9;
+    transform: translateY(-2px);
+}
+
+.feature-icon-small {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.feature-item strong {
+    display: block;
+    font-size: 1rem;
+    color: #1e293b;
+    margin-bottom: 4px;
+}
+
+.feature-item p {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.how-to-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: step-counter;
+}
+
+.how-to-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.how-to-list li:last-child {
+    border-bottom: none;
+}
+
+.step-number {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #1d4ed8 100%);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.step-text {
+    font-size: 1rem;
+    color: #334155;
+    line-height: 1.6;
+    padding-top: 6px;
+}
+
+.use-cases-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.use-cases-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.5;
+}
+
+.use-cases-list li svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.faq-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.faq-item:hover {
+    border-color: #cbd5e1;
+}
+
+.faq-question {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 24px;
+    background: #fff;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    transition: background 0.2s ease;
+}
+
+.faq-question:hover {
+    background: #f8fafc;
+}
+
+.faq-question svg {
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+    color: #64748b;
+}
+
+.faq-item.open .faq-question svg {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.faq-item.open .faq-answer {
+    max-height: 300px;
+}
+
+.faq-answer p {
+    padding: 0 24px 20px;
+    margin: 0;
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.7;
+}
+
+@media (max-width: 768px) {
+    .features-grid-article {
+        grid-template-columns: 1fr;
+    }
+    
+    .use-cases-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .article-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .article-section h3 {
+        font-size: 1.2rem;
+    }
+}

@@ -91,6 +91,19 @@ Project is ready for VPS deployment with:
 - All processing happens locally
 - Session-based management
 
+## SEO Article System
+Each tool page includes an SEO-optimized article section below the tool interface:
+- **content/tool_articles.py**: Contains article data for all 20 tools
+- **templates/partials/article.html**: Reusable article template component
+- Article sections: Title, Intro, Key Features, How-to Steps, Use Cases, FAQs
+- FAQ accordion with expand/collapse functionality
+- Keywords integrated for search engine optimization
+
+## All Tools Page
+- **templates/all_tools.html**: Dedicated page showing all tools in categorized grid
+- Route: /all-tools
+- 6-column responsive layout with colorful icons
+
 ## Auto-Delete Configuration (in app.py)
 - `FILE_MAX_AGE_SECONDS = 1800` - Files older than 30 minutes are deleted
 - `CLEANUP_INTERVAL_SECONDS = 300` - Cleanup check runs every 5 minutes
