@@ -174,6 +174,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const existingBlocks = editorOverlay.querySelectorAll('.text-block-overlay');
         existingBlocks.forEach(el => el.remove());
 
+        const existingPreviews = editorOverlay.querySelectorAll('.modified-text-preview');
+        existingPreviews.forEach(el => el.remove());
+
         const pageBlocks = textBlocks[currentPage] || [];
         pageBlocks.forEach((block, index) => {
             const editedBlock = editedTextBlocks[block.id];
@@ -187,6 +190,28 @@ document.addEventListener('DOMContentLoaded', function() {
             el.style.height = (block.height * pdfScale) + 'px';
             el.dataset.blockId = block.id;
             el.dataset.index = index;
+
+            if (editedBlock && editedBlock.modified) {
+                el.classList.add('modified');
+                
+                const preview = document.createElement('div');
+                preview.className = 'modified-text-preview';
+                preview.style.position = 'absolute';
+                preview.style.left = (block.x * pdfScale) + 'px';
+                preview.style.top = (block.y * pdfScale) + 'px';
+                preview.style.minWidth = (block.width * pdfScale) + 'px';
+                preview.style.fontSize = ((editedBlock.font_size || block.font_size) * pdfScale) + 'px';
+                preview.style.color = '#000';
+                preview.style.background = 'rgba(255, 255, 255, 0.95)';
+                preview.style.padding = '2px 4px';
+                preview.style.zIndex = '50';
+                preview.style.whiteSpace = 'pre-wrap';
+                preview.style.lineHeight = '1.2';
+                preview.style.fontFamily = 'Arial, sans-serif';
+                preview.style.pointerEvents = 'none';
+                preview.textContent = editedBlock.new_text;
+                editorOverlay.appendChild(preview);
+            }
 
             el.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -344,6 +369,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const editedBlock = editedTextBlocks[block.id] || block;
 
+        const livePreview = document.createElement('div');
+        livePreview.id = 'liveTextPreview';
+        livePreview.className = 'live-text-preview';
+        livePreview.style.position = 'absolute';
+        livePreview.style.left = (block.x * pdfScale) + 'px';
+        livePreview.style.top = (block.y * pdfScale) + 'px';
+        livePreview.style.minWidth = (block.width * pdfScale) + 'px';
+        livePreview.style.minHeight = (block.height * pdfScale) + 'px';
+        livePreview.style.fontSize = ((editedBlock.font_size || block.font_size) * pdfScale) + 'px';
+        livePreview.style.color = '#000';
+        livePreview.style.background = 'rgba(255, 255, 200, 0.9)';
+        livePreview.style.padding = '2px 4px';
+        livePreview.style.borderRadius = '2px';
+        livePreview.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+        livePreview.style.zIndex = '100';
+        livePreview.style.whiteSpace = 'pre-wrap';
+        livePreview.style.lineHeight = '1.2';
+        livePreview.style.fontFamily = 'Arial, sans-serif';
+        livePreview.textContent = editedBlock.new_text || editedBlock.text;
+        editorOverlay.appendChild(livePreview);
+
         const modal = document.createElement('div');
         modal.id = 'editTextModal';
         modal.className = 'text-input-modal';
@@ -355,6 +401,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button type="button" class="modal-close" id="closeEditModal">&times;</button>
                 </div>
                 <div class="modal-body">
+                    <div class="live-preview-hint" style="background:#e8f5e9;padding:8px 12px;border-radius:6px;margin-bottom:12px;font-size:13px;color:#2e7d32;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Live Preview: See your changes on the PDF in real-time
+                    </div>
                     <textarea id="editTextArea" rows="5" style="width:100%;padding:10px;font-size:14px;border:1px solid #ddd;border-radius:4px;">${editedBlock.new_text || editedBlock.text}</textarea>
                     <div class="text-options" style="margin-top:15px;">
                         <div class="option-row">
@@ -371,8 +421,31 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         document.body.appendChild(modal);
 
-        document.getElementById('closeEditModal').addEventListener('click', () => modal.remove());
-        document.getElementById('cancelEditText').addEventListener('click', () => modal.remove());
+        const textArea = document.getElementById('editTextArea');
+        const fontSizeInput = document.getElementById('editFontSize');
+
+        textArea.addEventListener('input', () => {
+            livePreview.textContent = textArea.value;
+        });
+
+        fontSizeInput.addEventListener('input', () => {
+            const newSize = parseInt(fontSizeInput.value) || block.font_size;
+            livePreview.style.fontSize = (newSize * pdfScale) + 'px';
+        });
+
+        const removeLivePreview = () => {
+            const preview = document.getElementById('liveTextPreview');
+            if (preview) preview.remove();
+        };
+
+        document.getElementById('closeEditModal').addEventListener('click', () => {
+            removeLivePreview();
+            modal.remove();
+        });
+        document.getElementById('cancelEditText').addEventListener('click', () => {
+            removeLivePreview();
+            modal.remove();
+        });
 
         document.getElementById('saveEditText').addEventListener('click', () => {
             const newText = document.getElementById('editTextArea').value;
@@ -395,8 +468,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             updateUndoButton();
+            removeLivePreview();
             modal.remove();
             hideInlineToolbar();
+            renderTextBlocks();
         });
     }
 

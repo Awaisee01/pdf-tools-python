@@ -5431,3 +5431,22 @@ input[type="range"]::-webkit-slider-thumb {
     width: 20px;
     height: 20px;
 }
+
+/* Modified text block styles */
+.text-block-overlay.modified {
+    border: 2px solid #4caf50 !important;
+    background: rgba(76, 175, 80, 0.1) !important;
+}
+
+.modified-text-preview {
+    border-left: 3px solid #4caf50;
+}
+
+.live-text-preview {
+    animation: pulse-preview 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-preview {
+    from { box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    to { box-shadow: 0 2px 12px rgba(76, 175, 80, 0.4); }
+}
