@@ -5,50 +5,53 @@ from io import BytesIO
 from PIL import Image
 
 def extract_text_blocks(input_path):
-    """Extract individual words with their positions from a PDF."""
+    """Extract text lines with their positions from a PDF (one line at a time)."""
     try:
         pdf = fitz.open(input_path)
         pages_data = []
         
         for page_num in range(len(pdf)):
             page = pdf[page_num]
-            words = page.get_text("words")
             page_dict = page.get_text("dict")
             
-            font_info = {}
+            text_blocks = []
+            line_idx = 0
+            
             for block in page_dict.get("blocks", []):
                 if block.get("type") == 0:
                     for line in block.get("lines", []):
-                        for span in line.get("spans", []):
-                            bbox = span.get("bbox", [0, 0, 0, 0])
-                            key = f"{int(bbox[0])}_{int(bbox[1])}"
-                            font_info[key] = {
-                                "size": span.get("size", 12),
-                                "font": span.get("font", "helv")
-                            }
-            
-            text_blocks = []
-            for idx, word_data in enumerate(words):
-                x0, y0, x1, y1, word, block_no, line_no, word_no = word_data
-                
-                word = word.strip()
-                if not word:
-                    continue
-                
-                key = f"{int(x0)}_{int(y0)}"
-                info = font_info.get(key, {"size": 12, "font": "helv"})
-                
-                text_blocks.append({
-                    "id": f"word_{page_num}_{idx}",
-                    "text": word,
-                    "x": x0,
-                    "y": y0,
-                    "width": x1 - x0,
-                    "height": y1 - y0,
-                    "font_size": info["size"],
-                    "font_name": info["font"],
-                    "page": page_num + 1
-                })
+                        line_text = ""
+                        font_size = 12
+                        font_name = "helv"
+                        
+                        spans = line.get("spans", [])
+                        if not spans:
+                            continue
+                        
+                        for span in spans:
+                            line_text += span.get("text", "")
+                            if not font_size or font_size == 12:
+                                font_size = span.get("size", 12)
+                                font_name = span.get("font", "helv")
+                        
+                        line_text = line_text.strip()
+                        if not line_text:
+                            continue
+                        
+                        line_bbox = line.get("bbox", [0, 0, 100, 20])
+                        
+                        text_blocks.append({
+                            "id": f"line_{page_num}_{line_idx}",
+                            "text": line_text,
+                            "x": line_bbox[0],
+                            "y": line_bbox[1],
+                            "width": line_bbox[2] - line_bbox[0],
+                            "height": line_bbox[3] - line_bbox[1],
+                            "font_size": font_size,
+                            "font_name": font_name,
+                            "page": page_num + 1
+                        })
+                        line_idx += 1
             
             pages_data.append({
                 "page": page_num + 1,
