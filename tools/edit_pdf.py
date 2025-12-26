@@ -5,43 +5,50 @@ from io import BytesIO
 from PIL import Image
 
 def extract_text_blocks(input_path):
-    """Extract text blocks with their positions from a PDF."""
+    """Extract individual words with their positions from a PDF."""
     try:
         pdf = fitz.open(input_path)
         pages_data = []
         
         for page_num in range(len(pdf)):
             page = pdf[page_num]
+            words = page.get_text("words")
             page_dict = page.get_text("dict")
             
-            text_blocks = []
+            font_info = {}
             for block in page_dict.get("blocks", []):
                 if block.get("type") == 0:
-                    block_text = ""
-                    font_size = 12
-                    font_name = "helv"
-                    
                     for line in block.get("lines", []):
                         for span in line.get("spans", []):
-                            block_text += span.get("text", "")
-                            font_size = span.get("size", 12)
-                            font_name = span.get("font", "helv")
-                        block_text += "\n"
-                    
-                    block_text = block_text.strip()
-                    if block_text:
-                        bbox = block.get("bbox", [0, 0, 100, 20])
-                        text_blocks.append({
-                            "id": f"block_{page_num}_{len(text_blocks)}",
-                            "text": block_text,
-                            "x": bbox[0],
-                            "y": bbox[1],
-                            "width": bbox[2] - bbox[0],
-                            "height": bbox[3] - bbox[1],
-                            "font_size": font_size,
-                            "font_name": font_name,
-                            "page": page_num + 1
-                        })
+                            bbox = span.get("bbox", [0, 0, 0, 0])
+                            key = f"{int(bbox[0])}_{int(bbox[1])}"
+                            font_info[key] = {
+                                "size": span.get("size", 12),
+                                "font": span.get("font", "helv")
+                            }
+            
+            text_blocks = []
+            for idx, word_data in enumerate(words):
+                x0, y0, x1, y1, word, block_no, line_no, word_no = word_data
+                
+                word = word.strip()
+                if not word:
+                    continue
+                
+                key = f"{int(x0)}_{int(y0)}"
+                info = font_info.get(key, {"size": 12, "font": "helv"})
+                
+                text_blocks.append({
+                    "id": f"word_{page_num}_{idx}",
+                    "text": word,
+                    "x": x0,
+                    "y": y0,
+                    "width": x1 - x0,
+                    "height": y1 - y0,
+                    "font_size": info["size"],
+                    "font_name": info["font"],
+                    "page": page_num + 1
+                })
             
             pages_data.append({
                 "page": page_num + 1,
