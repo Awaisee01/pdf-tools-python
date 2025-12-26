@@ -5450,3 +5450,82 @@ input[type="range"]::-webkit-slider-thumb {
     from { box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     to { box-shadow: 0 2px 12px rgba(76, 175, 80, 0.4); }
 }
+
+/* Enhanced Browse Files Button for Edit PDF */
+.editor-page .btn-upload,
+.editor-page .upload-zone .btn-upload {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 40px;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.editor-page .btn-upload::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.editor-page .btn-upload:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.editor-page .btn-upload:hover::before {
+    left: 100%;
+}
+
+.editor-page .btn-upload:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.editor-page .upload-zone {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    border: 3px dashed #667eea;
+    border-radius: 20px;
+    padding: 60px 40px;
+}
+
+.editor-page .upload-zone:hover {
+    border-color: #764ba2;
+    background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%);
+}
+
+.editor-page .upload-zone h4 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.editor-page .upload-zone p {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 25px;
+}
+
+.editor-page .upload-icon-wrapper svg {
+    width: 90px;
+    height: 90px;
+}
+
+.editor-page .upload-icon-wrapper svg path {
+    stroke: #667eea;
+    stroke-width: 2.5;
+}
