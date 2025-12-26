@@ -120,6 +120,18 @@ atexit.register(stop_cleanup_scheduler)
 def all_tools_page():
     return render_template('all_tools.html')
 
+@app.route('/about')
+def about_page():
+    return render_template('about.html')
+
+@app.route('/contact')
+def contact_page():
+    return render_template('contact.html')
+
+@app.route('/privacy')
+def privacy_page():
+    return render_template('privacy.html')
+
 @app.route('/')
 def index():
     all_tools = [
