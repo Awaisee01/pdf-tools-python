@@ -128,14 +128,13 @@ document.addEventListener('DOMContentLoaded', function() {
     async function renderPage(pageNum, preserveZoom = false) {
         currentPage = pageNum;
         const page = await pdfDoc.getPage(pageNum);
-        const container = document.getElementById('editorCanvasWrapper');
-        const maxWidth = container.clientWidth - 40 || 700;
-        const maxHeight = window.innerHeight - 250;
+        const canvasArea = document.querySelector('.editor-canvas-area');
+        const availableWidth = canvasArea ? canvasArea.clientWidth - 60 : window.innerWidth - 100;
+        const maxWidth = Math.max(availableWidth, 800);
 
         const viewport = page.getViewport({ scale: 1 });
         const scaleX = maxWidth > 0 ? maxWidth / viewport.width : 1;
-        const scaleY = maxHeight > 0 ? maxHeight / viewport.height : 1;
-        baseScale = Math.min(scaleX, scaleY, 1.5);
+        baseScale = Math.max(scaleX, 1);
         if (baseScale <= 0.1) baseScale = 1;
 
         if (!preserveZoom) {

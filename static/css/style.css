@@ -4138,6 +4138,8 @@ input[type="range"]::-webkit-slider-thumb {
     position: relative;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     background: white;
+    width: 100%;
+    max-width: 100%;
 }
 
 .editor-canvas-wrapper canvas {
