@@ -66,29 +66,35 @@
                     
                     <div class="settings-content">
                         {% if tool_name == 'compress' %}
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input type="radio" name="quality" value="low">
+                        <div class="compression-info">
+                            <p class="compression-note">Our smart compression reduces file size by optimizing images, removing metadata, and cleaning unused data.</p>
+                        </div>
+                        <div class="radio-group compression-options">
+                            <label class="radio-option compression-level extreme">
+                                <input type="radio" name="quality" value="extreme">
                                 <span class="radio-custom"></span>
                                 <div class="radio-text">
                                     <strong>Extreme Compression</strong>
-                                    <small>Smallest file size, lower quality (72 DPI)</small>
+                                    <small>Maximum size reduction. Best for web & email sharing.</small>
+                                    <span class="compression-badge">Up to 80% smaller</span>
                                 </div>
                             </label>
-                            <label class="radio-option selected">
+                            <label class="radio-option compression-level recommended selected">
                                 <input type="radio" name="quality" value="medium" checked>
                                 <span class="radio-custom"></span>
                                 <div class="radio-text">
-                                    <strong>Medium Compression</strong>
-                                    <small>Recommended - good balance (150 DPI)</small>
+                                    <strong>Recommended</strong>
+                                    <small>Great balance between size & quality. Perfect for most uses.</small>
+                                    <span class="compression-badge recommended-badge">Best Choice</span>
                                 </div>
                             </label>
-                            <label class="radio-option">
-                                <input type="radio" name="quality" value="high">
+                            <label class="radio-option compression-level less">
+                                <input type="radio" name="quality" value="less">
                                 <span class="radio-custom"></span>
                                 <div class="radio-text">
-                                    <strong>Low Compression</strong>
-                                    <small>Best quality, larger file size (200 DPI)</small>
+                                    <strong>Less Compression</strong>
+                                    <small>Preserve highest quality. Ideal for printing.</small>
+                                    <span class="compression-badge">Best Quality</span>
                                 </div>
                             </label>
                         </div>

@@ -5529,3 +5529,89 @@ input[type="range"]::-webkit-slider-thumb {
     stroke: #667eea;
     stroke-width: 2.5;
 }
+
+/* Compression Tool Styles */
+.compression-info {
+    background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4caf50;
+}
+
+.compression-note {
+    color: #2e7d32;
+    font-size: 0.95rem;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.compression-options .radio-option {
+    position: relative;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.compression-options .radio-option:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+}
+
+.compression-options .radio-option.selected {
+    border-color: #4caf50;
+    background: linear-gradient(135deg, #f1f8e9 0%, #e8f5e9 100%);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.15);
+}
+
+.compression-options .radio-option.extreme:hover {
+    border-color: #ff5722;
+}
+
+.compression-options .radio-option.less:hover {
+    border-color: #2196f3;
+}
+
+.compression-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: #e0e0e0;
+    color: #666;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.compression-options .extreme .compression-badge {
+    background: linear-gradient(135deg, #ff5722 0%, #ff7043 100%);
+    color: white;
+}
+
+.compression-options .recommended .compression-badge,
+.compression-badge.recommended-badge {
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+    color: white;
+}
+
+.compression-options .less .compression-badge {
+    background: linear-gradient(135deg, #2196f3 0%, #42a5f5 100%);
+    color: white;
+}
+
+.compression-options .radio-text strong {
+    font-size: 1.05rem;
+    color: #333;
+}
+
+.compression-options .radio-text small {
+    display: block;
+    color: #666;
+    margin-top: 4px;
+    line-height: 1.4;
+}
