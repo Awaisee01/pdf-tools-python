@@ -110,3 +110,31 @@ sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 ## 7. Verification
 - Visit `https://yourdomain.com`.
 - Test uploading and processing a PDF.
+
+# Deploy on Render (Testing/Free Tier)
+
+Since this app requires system dependencies (`poppler` and `tesseract`), we must use **Docker** on Render.
+
+## 1. Prepare Repository
+Ensure you have these files in your repo (I have verified they are there):
+- `Dockerfile`
+- `render.yaml`
+
+## 2. Deploy via Dashboard
+1.  Push your code to GitHub.
+2.  Log in to [Render.com](https://render.com).
+3.  Click **New +** -> **Web Service**.
+4.  Select **"Build and deploy from a Git repository"**.
+5.  Connect your `pdf-forge` repository.
+6.  Render will detect the `Dockerfile`.
+7.  Select **Free** plan.
+8.  Click **Create Web Service**.
+
+## 3. Deploy via Blueprint (Easier)
+1.  In Render dashboard, click **Blueprints**.
+2.  Connect your repo.
+3.  It will automatically read `render.yaml` and set everything up.
+4.  Click **Apply**.
+
+Render will build the Docker image (takes 2-3 mins) and deploy it.
+
