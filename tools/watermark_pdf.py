@@ -1,4 +1,5 @@
 import fitz
+import os
 
 def watermark_pdf(input_path, output_path, watermark_text, opacity=0.3):
     try:
@@ -34,6 +35,6 @@ def watermark_pdf(input_path, output_path, watermark_text, opacity=0.3):
         pdf.save(output_path)
         pdf.close()
         
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}

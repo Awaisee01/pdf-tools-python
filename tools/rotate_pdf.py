@@ -1,4 +1,5 @@
 import fitz
+import os
 
 def rotate_pdf(input_path, output_path, angle=90, pages='all', rotations=None):
     try:
@@ -32,6 +33,6 @@ def rotate_pdf(input_path, output_path, angle=90, pages='all', rotations=None):
         pdf.save(output_path)
         pdf.close()
         
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}

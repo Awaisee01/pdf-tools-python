@@ -161,7 +161,7 @@ def compress_pdf(input_path, output_path, quality='medium'):
         return {
             'success': True, 
             'output_path': output_path, 
-            'filename': output_path.split('/')[-1],
+            'filename': os.path.basename(output_path),
             'original_size': original_size,
             'new_size': new_size,
             'reduction': round(reduction, 1),

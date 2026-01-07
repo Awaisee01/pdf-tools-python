@@ -16,7 +16,7 @@ def extract_text(input_path, output_folder):
             f.write('\n'.join(text_content))
         
         pdf.close()
-        folder_id = output_folder.split('/')[-1]
+        folder_id = os.path.basename(output_folder)
         return {'success': True, 'output_folder': folder_id, 'files': [output_path], 'is_folder': True}
     except Exception as e:
         return {'success': False, 'error': str(e)}
@@ -50,7 +50,7 @@ def extract_images(input_path, output_folder):
         if not output_files:
             return {'success': False, 'error': 'No images found in PDF'}
         
-        folder_id = output_folder.split('/')[-1]
+        folder_id = os.path.basename(output_folder)
         return {'success': True, 'output_folder': folder_id, 'files': output_files, 'is_folder': True}
     except Exception as e:
         return {'success': False, 'error': str(e)}

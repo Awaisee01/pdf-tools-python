@@ -1,4 +1,5 @@
 import fitz
+import os
 
 def remove_pages(input_path, output_path, pages):
     try:
@@ -25,6 +26,6 @@ def remove_pages(input_path, output_path, pages):
         pdf.save(output_path)
         pdf.close()
         
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}

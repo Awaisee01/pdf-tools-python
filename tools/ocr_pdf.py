@@ -1,4 +1,5 @@
 import fitz
+import os
 import pytesseract
 from PIL import Image
 import io
@@ -54,6 +55,6 @@ def ocr_pdf(input_path, output_path, language='eng'):
         else:
             output_pdf.build([Paragraph("No text found via OCR", styles['Normal'])])
         
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}

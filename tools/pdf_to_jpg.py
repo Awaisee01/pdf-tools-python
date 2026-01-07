@@ -17,7 +17,7 @@ def pdf_to_jpg(input_path, output_folder, dpi=150):
             output_files.append(output_path)
         
         pdf.close()
-        folder_id = output_folder.split('/')[-1]
+        folder_id = os.path.basename(output_folder)
         
         if len(output_files) == 1:
             filename = os.path.basename(output_files[0])

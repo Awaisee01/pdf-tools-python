@@ -48,8 +48,8 @@ processed/
 *.log
 
 # UV / pip
-uv.lock
-pyproject.toml
+# uv.lock
+# pyproject.toml
 
 # Byte-compiled files
 *.pyc

@@ -1,4 +1,5 @@
 from openpyxl import load_workbook
+import os
 from reportlab.lib.pagesizes import letter, landscape
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
@@ -55,6 +56,6 @@ def excel_to_pdf(input_path, output_path):
         
         pdf.build(story)
         
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}

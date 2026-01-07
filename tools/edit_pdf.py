@@ -194,7 +194,7 @@ def edit_pdf(input_path, output_path, edits):
         pdf.save(output_path)
         pdf.close()
         
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}
 
@@ -221,6 +221,6 @@ def add_text_to_pdf(input_path, output_path, text_content, position):
         pdf.save(output_path)
         pdf.close()
         
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}

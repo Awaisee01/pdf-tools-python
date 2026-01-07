@@ -1,4 +1,5 @@
 import fitz
+import os
 from docx import Document
 from docx.shared import Inches, Pt
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -23,6 +24,6 @@ def pdf_to_word(input_path, output_path):
         doc.save(output_path)
         pdf.close()
         
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}

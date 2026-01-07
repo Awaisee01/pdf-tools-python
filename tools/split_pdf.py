@@ -37,7 +37,7 @@ def split_pdf(input_path, output_folder, split_type='all', pages=''):
                 output_files.append(output_path)
         
         pdf.close()
-        folder_id = output_folder.split('/')[-1]
+        folder_id = os.path.basename(output_folder)
         return {'success': True, 'output_folder': folder_id, 'files': output_files, 'is_folder': True}
     except Exception as e:
         return {'success': False, 'error': str(e)}

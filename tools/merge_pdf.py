@@ -1,3 +1,4 @@
+import os
 import fitz
 
 def merge_pdfs(input_files, output_path):
@@ -9,6 +10,6 @@ def merge_pdfs(input_files, output_path):
             pdf.close()
         result.save(output_path)
         result.close()
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}

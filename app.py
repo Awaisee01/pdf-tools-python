@@ -1,4 +1,6 @@
 import os
+import logging
+import sys
 import uuid
 import shutil
 from flask import Flask, render_template, request, send_file, redirect, url_for, jsonify, session
@@ -29,13 +31,29 @@ from tools.watermark_pdf import watermark_pdf
 from tools.edit_pdf import edit_pdf, extract_text_blocks
 from content.tool_articles import get_article
 
+import tempfile
+
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
 app = Flask(__name__)
 app.secret_key = os.environ.get('SESSION_SECRET', 'dev-secret-key-change-in-production')
 
-UPLOAD_FOLDER = 'uploads'
-PROCESSED_FOLDER = 'processed'
+# Use system temp directory
+BASE_TEMP_DIR = os.path.join(tempfile.gettempdir(), 'pdf-forge')
+UPLOAD_FOLDER = os.path.join(BASE_TEMP_DIR, 'uploads')
+PROCESSED_FOLDER = os.path.join(BASE_TEMP_DIR, 'processed')
 ALLOWED_EXTENSIONS = {'pdf', 'jpg', 'jpeg', 'png', 'docx', 'xlsx', 'pptx'}
 
+# Ensure directories exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PROCESSED_FOLDER, exist_ok=True)
 
@@ -57,7 +75,7 @@ def cleanup_file(filepath, delay=300):
             if os.path.exists(filepath):
                 os.remove(filepath)
         except Exception as e:
-            print(f"Error cleaning up {filepath}: {e}")
+            logger.error(f"Error cleaning up {filepath}: {e}")
     thread = threading.Thread(target=delete_after_delay)
     thread.daemon = True
     thread.start()
@@ -69,7 +87,7 @@ def cleanup_folder(folderpath, delay=300):
             if os.path.exists(folderpath):
                 shutil.rmtree(folderpath)
         except Exception as e:
-            print(f"Error cleaning up {folderpath}: {e}")
+            logger.error(f"Error cleaning up {folderpath}: {e}")
     thread = threading.Thread(target=delete_after_delay)
     thread.daemon = True
     thread.start()
@@ -92,22 +110,22 @@ def auto_cleanup_old_files():
                             file_age = current_time - os.path.getmtime(item_path)
                             if file_age > FILE_MAX_AGE_SECONDS:
                                 os.remove(item_path)
-                                print(f"Auto-deleted old file: {item_path}")
+                                logger.info(f"Auto-deleted old file: {item_path}")
                         elif os.path.isdir(item_path):
                             folder_age = current_time - os.path.getmtime(item_path)
                             if folder_age > FILE_MAX_AGE_SECONDS:
                                 shutil.rmtree(item_path)
-                                print(f"Auto-deleted old folder: {item_path}")
+                                logger.info(f"Auto-deleted old folder: {item_path}")
                     except Exception as e:
-                        print(f"Error deleting {item_path}: {e}")
+                        logger.error(f"Error deleting {item_path}: {e}")
         except Exception as e:
-            print(f"Error in auto cleanup: {e}")
+            logger.error(f"Error in auto cleanup: {e}")
         time.sleep(CLEANUP_INTERVAL_SECONDS)
 
 def start_cleanup_scheduler():
     cleanup_thread = threading.Thread(target=auto_cleanup_old_files, daemon=True)
     cleanup_thread.start()
-    print(f"Background cleanup scheduler started (deletes files older than {FILE_MAX_AGE_SECONDS // 60} minutes)")
+    logger.info(f"Background cleanup scheduler started (deletes files older than {FILE_MAX_AGE_SECONDS // 60} minutes)")
 
 def stop_cleanup_scheduler():
     global cleanup_thread_running
@@ -397,6 +415,8 @@ def process_tool(tool_name):
         
         if result and result.get('success'):
             if 'output_path' in result:
+                # Ensure the filename sent to frontend is just the basename
+                result['filename'] = os.path.basename(result['output_path'])
                 cleanup_file(result['output_path'])
             return jsonify(result)
         else:
@@ -443,4 +463,4 @@ def api_extract_text_blocks():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=False)

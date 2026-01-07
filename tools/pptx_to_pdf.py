@@ -1,4 +1,5 @@
 from pptx import Presentation
+import os
 from reportlab.lib.pagesizes import landscape, letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -59,6 +60,6 @@ def pptx_to_pdf(input_path, output_path):
         else:
             pdf.build([Paragraph("Empty presentation", styles['Normal'])])
         
-        return {'success': True, 'output_path': output_path, 'filename': output_path.split('/')[-1]}
+        return {'success': True, 'output_path': output_path, 'filename': os.path.basename(output_path)}
     except Exception as e:
         return {'success': False, 'error': str(e)}
