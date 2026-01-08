@@ -26,6 +26,7 @@ from tools.extract_pdf import extract_text, extract_images
 from tools.ocr_pdf import ocr_pdf
 from tools.unlock_pdf import unlock_pdf
 from tools.protect_pdf import protect_pdf
+from tools.sign_pdf import sign_pdf
 from tools.watermark_pdf import watermark_pdf
 from tools.edit_pdf import edit_pdf, extract_text_blocks
 from tools.pdf_to_excel import pdf_to_excel
