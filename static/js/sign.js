@@ -421,12 +421,18 @@ document.addEventListener('DOMContentLoaded', function () {
         signatureElement.appendChild(removeBtn);
 
         signatureOverlay.appendChild(signatureElement);
+
         makeDraggable(signatureElement);
+        makeResizable(signatureElement);
 
         const x = signatureElement.offsetLeft / pdfScale;
         const y = signatureElement.offsetTop / pdfScale;
+        const w = signatureElement.offsetWidth / pdfScale;
+        const h = signatureElement.offsetHeight / pdfScale;
         document.getElementById('signatureX').value = x;
         document.getElementById('signatureY').value = y;
+        document.getElementById('signatureWidth').value = w;
+        document.getElementById('signatureHeight').value = h;
     }
 
     function getFontFamily(font) {
@@ -438,6 +444,68 @@ document.addEventListener('DOMContentLoaded', function () {
         return fonts[font] || fonts['cursive1'];
     }
 
+    function makeResizable(element) {
+        const handle = document.createElement('div');
+        handle.className = 'resize-handle';
+        handle.style.width = '10px';
+        handle.style.height = '10px';
+        handle.style.background = '#3f51b5';
+        handle.style.position = 'absolute';
+        handle.style.right = '-5px';
+        handle.style.bottom = '-5px';
+        handle.style.cursor = 'se-resize';
+        handle.style.zIndex = '11';
+        element.appendChild(handle);
+
+        let isResizing = false;
+        let originalWidth, originalHeight, originalX, originalY, originalMouseX, originalMouseY;
+
+        handle.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            originalWidth = parseFloat(getComputedStyle(element, null).getPropertyValue('width').replace('px', ''));
+            originalHeight = parseFloat(getComputedStyle(element, null).getPropertyValue('height').replace('px', ''));
+            originalX = element.getBoundingClientRect().left;
+            originalY = element.getBoundingClientRect().top;
+            originalMouseX = e.pageX;
+            originalMouseY = e.pageY;
+            window.addEventListener('mousemove', resize);
+            window.addEventListener('mouseup', stopResize);
+        });
+
+        function resize(e) {
+            if (!isResizing) return;
+            const width = originalWidth + (e.pageX - originalMouseX);
+            const height = originalHeight + (e.pageY - originalMouseY);
+            if (width > 20) {
+                element.style.width = width + 'px';
+                element.style.maxWidth = 'none';
+                const img = element.querySelector('img');
+                if (img) { img.style.maxWidth = '100%'; img.style.maxHeight = '100%'; img.style.width = '100%'; img.style.height = '100%'; }
+            }
+            if (height > 20) {
+                element.style.height = height + 'px';
+                element.style.maxHeight = 'none';
+            }
+            // Scale font if text based on height
+            if (element.textContent && !element.querySelector('img')) {
+                element.style.fontSize = (height * 0.6) + 'px';
+            }
+        }
+
+        function stopResize() {
+            isResizing = false;
+            window.removeEventListener('mousemove', resize);
+            window.removeEventListener('mouseup', stopResize);
+
+            const w = element.offsetWidth / pdfScale;
+            const h = element.offsetHeight / pdfScale;
+            document.getElementById('signatureWidth').value = w;
+            document.getElementById('signatureHeight').value = h;
+        }
+    }
+
     function makeDraggable(element) {
         let isDragging = false;
         let startX, startY, initialLeft, initialTop;
@@ -446,7 +514,7 @@ document.addEventListener('DOMContentLoaded', function () {
         element.addEventListener('touchstart', startDrag);
 
         function startDrag(e) {
-            if (e.target.classList.contains('signature-remove-btn')) return;
+            if (e.target.classList.contains('signature-remove-btn') || e.target.classList.contains('resize-handle')) return;
             isDragging = true;
             const event = e.type === 'touchstart' ? e.touches[0] : e;
             startX = event.clientX;
@@ -567,6 +635,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         formData.append('x', document.getElementById('signatureX').value);
         formData.append('y', document.getElementById('signatureY').value);
+        formData.append('width', document.getElementById('signatureWidth').value);
+        formData.append('height', document.getElementById('signatureHeight').value);
         formData.append('page', document.getElementById('signaturePage').value);
 
         const submitBtn = signForm.querySelector('button[type="submit"]');

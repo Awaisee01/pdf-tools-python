@@ -7,17 +7,18 @@
     <div class="container">
         <a href="/" class="back-link">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/>
+                <path d="M19 12H5" />
+                <polyline points="12 19 5 12 12 5" />
             </svg>
             Back to All Tools
         </a>
-        
+
         <div class="advanced-tool-layout sign-layout" id="signToolLayout" style="display: none;">
             <div class="page-thumbnails-sidebar">
                 <h3>Pages</h3>
                 <div class="page-thumbnails-list" id="pageThumbnails"></div>
             </div>
-            
+
             <div class="pdf-preview-area sign-preview">
                 <div class="pdf-canvas-container" id="pdfCanvasContainer">
                     <canvas id="pdfCanvas"></canvas>
@@ -29,7 +30,8 @@
                     <button type="button" id="nextPage" disabled>Next &gt;</button>
                     <div class="zoom-controls">
                         <button type="button" class="zoom-btn" id="zoomOut" title="Zoom Out">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                 <line x1="8" y1="11" x2="14" y2="11"></line>
@@ -37,7 +39,8 @@
                         </button>
                         <span id="zoomLevel" class="zoom-level">100%</span>
                         <button type="button" class="zoom-btn" id="zoomIn" title="Zoom In">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                stroke-width="2">
                                 <circle cx="11" cy="11" r="8"></circle>
                                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                 <line x1="11" y1="8" x2="11" y2="14"></line>
@@ -45,17 +48,20 @@
                             </svg>
                         </button>
                         <button type="button" class="zoom-btn" id="zoomFit" title="Fit to Screen">
-                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path
+                                    d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3">
+                                </path>
                             </svg>
                         </button>
                     </div>
                 </div>
             </div>
-            
+
             <div class="signing-options-panel">
                 <h2>Signing Options</h2>
-                
+
                 <div class="sign-type-section">
                     <label class="section-label">TYPE</label>
                     <div class="sign-type-buttons">
@@ -74,7 +80,7 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="required-fields-section">
                     <label class="section-label">REQUIRED FIELDS</label>
                     <div class="field-item signature-field" id="addSignatureField">
@@ -89,7 +95,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="optional-fields-section">
                     <label class="section-label">OPTIONAL FIELDS</label>
                     <div class="field-item" id="addInitialsField">
@@ -126,11 +132,13 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <form id="signForm" enctype="multipart/form-data">
                     <input type="hidden" name="signature" id="signatureData" value="">
                     <input type="hidden" name="signature_x" id="signatureX" value="100">
                     <input type="hidden" name="signature_y" id="signatureY" value="100">
+                    <input type="hidden" name="signature_width" id="signatureWidth" value="200">
+                    <input type="hidden" name="signature_height" id="signatureHeight" value="80">
                     <input type="hidden" name="page" id="signaturePage" value="1">
                     <button type="submit" class="btn btn-sign">
                         Sign PDF
@@ -143,21 +151,24 @@
                 </form>
             </div>
         </div>
-        
+
         <div class="initial-upload-area" id="initialUpload">
             <div class="tool-title">
                 <h1>Sign PDF</h1>
                 <p>Add your signature to any PDF document</p>
             </div>
-            
+
             <div class="upload-card-centered">
                 <div class="upload-zone" id="dropzone">
                     <div class="upload-icon-wrapper">
                         <svg class="upload-box-icon" viewBox="0 0 64 64" fill="none">
-                            <path d="M52 24v28a4 4 0 01-4 4H16a4 4 0 01-4-4V24" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
-                            <path d="M8 24l24-16 24 16" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M32 24v20" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
-                            <path d="M24 36l8 8 8-8" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M52 24v28a4 4 0 01-4 4H16a4 4 0 01-4-4V24" stroke="#3b82f6" stroke-width="3"
+                                stroke-linecap="round" />
+                            <path d="M8 24l24-16 24 16" stroke="#1d4ed8" stroke-width="3" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M32 24v20" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" />
+                            <path d="M24 36l8 8 8-8" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"
+                                stroke-linejoin="round" />
                         </svg>
                     </div>
                     <h4>Drop your PDF here</h4>
@@ -167,7 +178,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="signatureModal" class="signature-modal" style="display: none;">
             <div class="modal-content">
                 <div class="modal-header">
@@ -185,7 +196,7 @@
                             <input type="text" id="initialsInput" placeholder="e.g. JD" maxlength="3">
                         </div>
                     </div>
-                    
+
                     <div class="signature-tabs">
                         <button type="button" class="sig-tab active" data-tab="type">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -210,7 +221,7 @@
                             Upload
                         </button>
                     </div>
-                    
+
                     <div class="signature-tab-content" id="typeTabContent">
                         <div class="font-options">
                             <label class="font-option">
@@ -229,19 +240,23 @@
                         <div class="color-options">
                             <label>Color:</label>
                             <div class="color-buttons">
-                                <button type="button" class="color-btn active" data-color="#000000" style="background: #000000;"></button>
-                                <button type="button" class="color-btn" data-color="#e74c3c" style="background: #e74c3c;"></button>
-                                <button type="button" class="color-btn" data-color="#3498db" style="background: #3498db;"></button>
-                                <button type="button" class="color-btn" data-color="#27ae60" style="background: #27ae60;"></button>
+                                <button type="button" class="color-btn active" data-color="#000000"
+                                    style="background: #000000;"></button>
+                                <button type="button" class="color-btn" data-color="#e74c3c"
+                                    style="background: #e74c3c;"></button>
+                                <button type="button" class="color-btn" data-color="#3498db"
+                                    style="background: #3498db;"></button>
+                                <button type="button" class="color-btn" data-color="#27ae60"
+                                    style="background: #27ae60;"></button>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="signature-tab-content" id="drawTabContent" style="display: none;">
                         <canvas id="drawCanvas" width="400" height="150"></canvas>
                         <button type="button" class="btn btn-secondary btn-small" id="clearDrawing">Clear</button>
                     </div>
-                    
+
                     <div class="signature-tab-content" id="uploadTabContent" style="display: none;">
                         <div class="upload-signature-zone" id="signatureUploadZone">
                             <input type="file" id="signatureFileInput" accept="image/*" hidden>
@@ -255,11 +270,12 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="result-area" id="resultArea" style="display: none;">
             <div class="result-card">
                 <svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                    <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
                 <h2>Success!</h2>
                 <p id="resultMessage">Your PDF has been signed successfully.</p>
@@ -267,11 +283,13 @@
                 <button class="btn btn-secondary" id="processAnother">Sign Another PDF</button>
             </div>
         </div>
-        
+
         <div class="error-area" id="errorArea" style="display: none;">
             <div class="error-card">
                 <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="15" y1="9" x2="9" y2="15" />
+                    <line x1="9" y1="9" x2="15" y2="15" />
                 </svg>
                 <h2>Error</h2>
                 <p id="errorMessage">Something went wrong.</p>
@@ -287,7 +305,7 @@
 {% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 </script>
 <script src="{{ url_for('static', filename='js/sign.js') }}"></script>
 {% endblock %}

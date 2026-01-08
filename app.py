@@ -26,9 +26,10 @@ from tools.extract_pdf import extract_text, extract_images
 from tools.ocr_pdf import ocr_pdf
 from tools.unlock_pdf import unlock_pdf
 from tools.protect_pdf import protect_pdf
-from tools.sign_pdf import sign_pdf
 from tools.watermark_pdf import watermark_pdf
 from tools.edit_pdf import edit_pdf, extract_text_blocks
+from tools.pdf_to_excel import pdf_to_excel
+from tools.pdf_to_powerpoint import pdf_to_powerpoint
 from content.tool_articles import get_article
 
 import tempfile
@@ -174,6 +175,8 @@ def index():
         {'name': 'Sign PDF', 'icon': 'sign', 'description': 'Add signature to PDF', 'url': '/tool/sign', 'color': '#3f51b5'},
         {'name': 'Watermark PDF', 'icon': 'watermark', 'description': 'Add watermark to PDF', 'url': '/tool/watermark', 'color': '#009688'},
         {'name': 'Edit PDF', 'icon': 'edit', 'description': 'Add text & images', 'url': '/tool/edit', 'color': '#8bc34a'},
+        {'name': 'PDF to Excel', 'icon': 'excel', 'description': 'Convert PDF to Excel', 'url': '/tool/pdf-to-excel', 'color': '#2e7d32'},
+        {'name': 'PDF to PowerPoint', 'icon': 'pptx', 'description': 'Convert PDF to PPTX', 'url': '/tool/pdf-to-powerpoint', 'color': '#d84315'},
     ]
     popular_names = ['Merge PDF', 'Compress PDF', 'Split PDF', 'Edit PDF', 'PDF to JPG', 'JPG to PDF']
     popular_tools = [t for t in all_tools if t['name'] in popular_names]
@@ -203,6 +206,8 @@ def tool_page(tool_name):
         'sign': {'title': 'Sign PDF', 'description': 'Add your signature to PDF', 'accept': '.pdf', 'multiple': False, 'icon': 'sign', 'color': '#3f51b5'},
         'watermark': {'title': 'Watermark PDF', 'description': 'Add text or image watermark to PDF', 'accept': '.pdf', 'multiple': False, 'icon': 'watermark', 'color': '#009688'},
         'edit': {'title': 'Edit PDF', 'description': 'Add text and images to your PDF', 'accept': '.pdf', 'multiple': False, 'icon': 'edit', 'color': '#8bc34a'},
+        'pdf-to-excel': {'title': 'PDF to Excel', 'description': 'Convert PDF tables and text to Excel spreadsheet.', 'accept': '.pdf', 'multiple': False, 'icon': 'excel', 'color': '#2e7d32'},
+        'pdf-to-powerpoint': {'title': 'PDF to PowerPoint', 'description': 'Convert PDF pages to PowerPoint slides.', 'accept': '.pdf', 'multiple': False, 'icon': 'pptx', 'color': '#d84315'},
     }
     
     if tool_name not in tool_info:
@@ -393,6 +398,8 @@ def process_tool(tool_name):
             position = {
                 'x': float(request.form.get('x', 100)),
                 'y': float(request.form.get('y', 100)),
+                'width': float(request.form.get('width', 200)),
+                'height': float(request.form.get('height', 80)),
                 'page': int(request.form.get('page', 1))
             }
             output_filename = 'signed.pdf'
@@ -416,6 +423,16 @@ def process_tool(tool_name):
             output_filename = 'edited.pdf'
             output_path = os.path.join(PROCESSED_FOLDER, generate_unique_filename(output_filename))
             result = edit_pdf(saved_files[0], output_path, edits)
+        
+        elif tool_name == 'pdf-to-excel':
+            output_filename = 'converted.xlsx'
+            output_path = os.path.join(PROCESSED_FOLDER, generate_unique_filename(output_filename))
+            result = pdf_to_excel(saved_files[0], output_path)
+
+        elif tool_name == 'pdf-to-powerpoint':
+            output_filename = 'converted.pptx'
+            output_path = os.path.join(PROCESSED_FOLDER, generate_unique_filename(output_filename))
+            result = pdf_to_powerpoint(saved_files[0], output_path)
         
         else:
             return jsonify({'error': 'Unknown tool'}), 400

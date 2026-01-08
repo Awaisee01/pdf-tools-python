@@ -42,14 +42,22 @@ def sign_pdf(input_path, output_path, signature_data, position):
             img.save(img_bytes, format='PNG')
             img_bytes.seek(0)
             
-            width = min(img.width, 200)
-            height = int(width * img.height / img.width)
+            width = position.get('width', 200)
+            height = position.get('height', 80)
+            # If no explicit dim, preserve aspect ratio (legacy fallback)
+            if width == 200 and height == 80:
+                width = min(img.width, 200)
+                height = int(width * img.height / img.width)
             
             rect = fitz.Rect(x, y, x + width, y + height)
             page.insert_image(rect, stream=img_bytes.read())
         else:
-            font_size = 20
-            text_rect = fitz.Rect(x, y, x + 200, y + 30)
+            width = position.get('width', 200)
+            height = position.get('height', 30)
+            # Calculate font size roughly based on height
+            font_size = height * 0.6
+            
+            text_rect = fitz.Rect(x, y, x + width, y + height)
             page.insert_textbox(text_rect, signature_data, fontsize=font_size, 
                               fontname="helv", color=(0, 0, 0.5))
         
