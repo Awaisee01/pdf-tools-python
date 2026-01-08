@@ -45,6 +45,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 1000 * 1024 * 1024  # 500MB limit
 app.secret_key = os.environ.get('SESSION_SECRET', 'dev-secret-key-change-in-production')
 
 # Use system temp directory
@@ -230,23 +231,29 @@ def tool_page(tool_name):
 @app.route('/process/<tool_name>', methods=['POST'])
 def process_tool(tool_name):
     try:
-        if 'file' not in request.files and 'files' not in request.files:
-            return jsonify({'error': 'No file uploaded'}), 400
-        
-        files = request.files.getlist('files') if 'files' in request.files else [request.files['file']]
-        
-        if not files or all(f.filename == '' for f in files):
-            return jsonify({'error': 'No file selected'}), 400
-        
         saved_files = []
-        for f in files:
-            if f and f.filename:
-                filename = generate_unique_filename(f.filename)
-                filepath = os.path.join(UPLOAD_FOLDER, filename)
-                f.save(filepath)
-                saved_files.append(filepath)
-                cleanup_file(filepath)
-        
+        if 'server_filename' in request.form:
+            server_filename = request.form['server_filename']
+            file_path = os.path.join(UPLOAD_FOLDER, secure_filename(server_filename))
+            if os.path.exists(file_path):
+                saved_files.append(file_path)
+            else:
+                 return jsonify({'error': 'File not found or expired'}), 404
+        elif 'file' in request.files or 'files' in request.files:
+            files = request.files.getlist('files') if 'files' in request.files else [request.files['file']]
+            if not files or all(f.filename == '' for f in files):
+                return jsonify({'error': 'No file selected'}), 400
+            
+            for f in files:
+                if f and f.filename:
+                    filename = generate_unique_filename(f.filename)
+                    filepath = os.path.join(UPLOAD_FOLDER, filename)
+                    f.save(filepath)
+                    saved_files.append(filepath)
+                    cleanup_file(filepath)
+        else:
+             return jsonify({'error': 'No file uploaded'}), 400
+
         if not saved_files:
             return jsonify({'error': 'No valid files uploaded'}), 400
         
@@ -459,6 +466,28 @@ def api_extract_text_blocks():
         
         result = extract_text_blocks(filepath)
         return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/upload', methods=['POST'])
+def api_upload():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file part'}), 400
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        filename = generate_unique_filename(file.filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+        cleanup_file(filepath)
+        
+        return jsonify({
+            'success': True, 
+            'filename': filename, 
+            'original_name': file.filename
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

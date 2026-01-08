@@ -1,4 +1,5 @@
 import fitz
+import os
 import json
 import base64
 from io import BytesIO
@@ -84,112 +85,122 @@ def edit_pdf(input_path, output_path, edits):
         pdf = fitz.open(input_path)
         
         for edit in edits:
-            page_num = edit.get('page', 1) - 1
-            if page_num < 0 or page_num >= len(pdf):
-                continue
-            
-            page = pdf[page_num]
-            edit_type = edit.get('type', 'add')
-            
-            if edit_type == 'text':
-                x = edit.get('x', 100)
-                y = edit.get('y', 100)
-                content = edit.get('content', '')
-                font_size = edit.get('fontSize', 14)
-                color = edit.get('color', '#000000')
+            try:
+                page_num = int(edit.get('page', 1)) - 1
+                if page_num < 0 or page_num >= len(pdf):
+                    continue
                 
-                if isinstance(color, str):
-                    color = hex_to_rgb(color)
-                elif isinstance(color, list):
-                    color = tuple(c if c <= 1 else c/255 for c in color)
+                page = pdf[page_num]
+                edit_type = edit.get('type', 'add')
                 
-                if content:
-                    text_point = fitz.Point(x, y + font_size)
-                    page.insert_text(text_point, content, fontsize=font_size,
-                                   fontname="helv", color=color)
-            
-            elif edit_type in ('image', 'signature'):
-                x = edit.get('x', 100)
-                y = edit.get('y', 100)
-                width = edit.get('width', 150)
-                height = edit.get('height', 100)
-                data = edit.get('data', '')
-                
-                if data and data.startswith('data:'):
-                    base64_data = data.split(',')[1] if ',' in data else data
-                    img_bytes = base64.b64decode(base64_data)
+                if edit_type == 'text':
+                    x = float(edit.get('x', 100))
+                    y = float(edit.get('y', 100))
+                    content = edit.get('content', '')
+                    font_size = float(edit.get('fontSize', 14))
+                    color = edit.get('color', '#000000')
                     
-                    img_rect = fitz.Rect(x, y, x + width, y + height)
-                    page.insert_image(img_rect, stream=img_bytes)
-            
-            elif edit_type == 'whiteout':
-                x = edit.get('x', 0)
-                y = edit.get('y', 0)
-                width = edit.get('width', 100)
-                height = edit.get('height', 20)
+                    if isinstance(color, str):
+                        color = hex_to_rgb(color)
+                    elif isinstance(color, list):
+                        color = tuple(c if c <= 1 else c/255 for c in color)
+                    
+                    if content:
+                        text_point = fitz.Point(x, y + font_size)
+                        page.insert_text(text_point, content, fontsize=font_size,
+                                       fontname="helv", color=color)
                 
-                rect = fitz.Rect(x, y, x + width, y + height)
-                page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
-            
-            elif edit_type == 'shape':
-                x = edit.get('x', 0)
-                y = edit.get('y', 0)
-                width = edit.get('width', 100)
-                height = edit.get('height', 100)
-                shape_type = edit.get('shape', 'rectangle')
-                color = edit.get('color', '#000000')
+                elif edit_type in ('image', 'signature'):
+                    x = float(edit.get('x', 100))
+                    y = float(edit.get('y', 100))
+                    width = float(edit.get('width', 150))
+                    height = float(edit.get('height', 100))
+                    data = edit.get('data', '')
+                    
+                    if data and data.startswith('data:'):
+                        base64_data = data.split(',')[1] if ',' in data else data
+                        img_bytes = base64.b64decode(base64_data)
+                        
+                        img_rect = fitz.Rect(x, y, x + width, y + height)
+                        page.insert_image(img_rect, stream=img_bytes)
                 
-                if isinstance(color, str):
-                    color = hex_to_rgb(color)
+                elif edit_type == 'whiteout':
+                    x = float(edit.get('x', 0))
+                    y = float(edit.get('y', 0))
+                    width = float(edit.get('width', 100))
+                    height = float(edit.get('height', 20))
+                    
+                    rect = fitz.Rect(x, y, x + width, y + height)
+                    page.draw_rect(rect, color=(1, 1, 1), fill=(1, 1, 1))
                 
-                rect = fitz.Rect(x, y, x + width, y + height)
+                elif edit_type == 'shape':
+                    x = float(edit.get('x', 0))
+                    y = float(edit.get('y', 0))
+                    width = float(edit.get('width', 100))
+                    height = float(edit.get('height', 100))
+                    shape_type = edit.get('shape', 'rectangle')
+                    color = edit.get('color', '#000000')
+                    
+                    if isinstance(color, str):
+                        color = hex_to_rgb(color)
+                    
+                    rect = fitz.Rect(x, y, x + width, y + height)
+                    
+                    if shape_type == 'circle':
+                        center = fitz.Point(x + width/2, y + height/2)
+                        radius = min(width, height) / 2
+                        page.draw_circle(center, radius, color=color, width=2)
+                    else:
+                        page.draw_rect(rect, color=color, width=2)
                 
-                if shape_type == 'circle':
-                    center = fitz.Point(x + width/2, y + height/2)
-                    radius = min(width, height) / 2
-                    page.draw_circle(center, radius, color=color, width=2)
-                else:
-                    page.draw_rect(rect, color=color, width=2)
-            
-            elif edit_type == 'modify':
-                rect = edit.get('original_rect', [0, 0, 100, 20])
-                fitz_rect = fitz.Rect(rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])
+                elif edit_type == 'modify':
+                    rect = edit.get('original_rect', [0, 0, 100, 20])
+                    fitz_rect = fitz.Rect(float(rect[0]), float(rect[1]), float(rect[0]) + float(rect[2]), float(rect[1]) + float(rect[3]))
+                    
+                    page.add_redact_annot(fitz_rect, fill=(1, 1, 1))
+                    page.apply_redactions()
+                    
+                    new_text = edit.get('new_text', '')
+                    font_size = float(edit.get('font_size', 12))
+                    font_name = edit.get('font_name', 'helv')
+                    color = edit.get('color', '#000000')
+                    
+                    if isinstance(color, str):
+                        color = hex_to_rgb(color)
+                    elif isinstance(color, list):
+                        color = tuple(c if c <= 1 else c/255 for c in color)
+                    
+                    if new_text:
+                        text_point = fitz.Point(float(rect[0]), float(rect[1]) + font_size)
+                        page.insert_text(text_point, new_text, fontsize=font_size, 
+                                       fontname=font_name, color=color)
                 
-                page.add_redact_annot(fitz_rect, fill=(1, 1, 1))
-                page.apply_redactions()
+                elif edit_type == 'add':
+                    x = float(edit.get('x', 100))
+                    y = float(edit.get('y', 100))
+                    text = edit.get('text', '')
+                    font_size = float(edit.get('font_size', 12))
+                    color = edit.get('color', '#000000')
+                    
+                    if isinstance(color, str):
+                        color = hex_to_rgb(color)
+                    elif isinstance(color, list):
+                        color = tuple(c if c <= 1 else c/255 for c in color)
+                    
+                    if text:
+                        text_point = fitz.Point(x, y + font_size)
+                        page.insert_text(text_point, text, fontsize=font_size,
+                                       fontname="helv", color=color)
                 
-                new_text = edit.get('new_text', '')
-                font_size = edit.get('font_size', 12)
-                font_name = edit.get('font_name', 'helv')
-                color = edit.get('color', '#000000')
-                
-                if isinstance(color, str):
-                    color = hex_to_rgb(color)
-                elif isinstance(color, list):
-                    color = tuple(c if c <= 1 else c/255 for c in color)
-                
-                if new_text:
-                    text_point = fitz.Point(rect[0], rect[1] + font_size)
-                    page.insert_text(text_point, new_text, fontsize=font_size, 
-                                   fontname=font_name, color=color)
-            
-            elif edit_type == 'add':
-                x = edit.get('x', 100)
-                y = edit.get('y', 100)
-                text = edit.get('text', '')
-                font_size = edit.get('font_size', 12)
-                color = edit.get('color', [0, 0, 0])
-                
-                if text:
-                    text_point = fitz.Point(x, y + font_size)
-                    page.insert_text(text_point, text, fontsize=font_size,
-                                   fontname="helv", color=tuple(color))
-            
-            elif edit_type == 'delete':
-                rect = edit.get('rect', [0, 0, 100, 20])
-                fitz_rect = fitz.Rect(rect[0], rect[1], rect[0] + rect[2], rect[1] + rect[3])
-                page.add_redact_annot(fitz_rect, fill=(1, 1, 1))
-                page.apply_redactions()
+                elif edit_type == 'delete':
+                    rect = edit.get('rect', [0, 0, 100, 20])
+                    fitz_rect = fitz.Rect(float(rect[0]), float(rect[1]), float(rect[0]) + float(rect[2]), float(rect[1]) + float(rect[3]))
+                    page.add_redact_annot(fitz_rect, fill=(1, 1, 1))
+                    page.apply_redactions()
+
+            except Exception as inner_e:
+                print(f"Error applying edit {edit}: {inner_e}")
+                continue
         
         pdf.save(output_path)
         pdf.close()

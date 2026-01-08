@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('fileInput');
     const browseBtn = document.getElementById('browseBtn');
     const dropzone = document.getElementById('dropzone');
@@ -138,20 +138,20 @@ document.addEventListener('DOMContentLoaded', function() {
         const container = document.getElementById('pdfCanvasContainer');
         const maxWidth = container.clientWidth - 40 || 700;
         const maxHeight = Math.max(container.clientHeight - 40, window.innerHeight * 0.65);
-        
+
         const viewport = page.getViewport({ scale: 1 });
         const scaleX = maxWidth > 0 ? maxWidth / viewport.width : 1;
         const scaleY = maxHeight > 0 ? maxHeight / viewport.height : 1;
         baseScale = Math.min(scaleX, scaleY, 2);
         if (baseScale <= 0.1) baseScale = 1;
-        
+
         if (!preserveZoom) {
             zoomFactor = 1;
             updateZoomLevel();
         }
-        
+
         pdfScale = baseScale * zoomFactor;
-        
+
         const scaledViewport = page.getViewport({ scale: pdfScale });
 
         pdfCanvas.width = scaledViewport.width;
@@ -162,13 +162,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.getElementById('signaturePage').value = pageNum;
     }
-    
+
     function updateZoomLevel() {
         if (zoomLevelSpan) {
             zoomLevelSpan.textContent = Math.round(zoomFactor * 100) + '%';
         }
     }
-    
+
     async function zoomIn() {
         if (zoomFactor < 3) {
             zoomFactor = Math.min(zoomFactor + 0.25, 3);
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
             await renderPage(currentPage, true);
         }
     }
-    
+
     async function zoomOut() {
         if (zoomFactor > 0.5) {
             zoomFactor = Math.max(zoomFactor - 0.25, 0.5);
@@ -184,13 +184,13 @@ document.addEventListener('DOMContentLoaded', function() {
             await renderPage(currentPage, true);
         }
     }
-    
+
     async function zoomFit() {
         zoomFactor = 1;
         updateZoomLevel();
         await renderPage(currentPage, true);
     }
-    
+
     if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
     if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
     if (zoomFitBtn) zoomFitBtn.addEventListener('click', zoomFit);
@@ -422,7 +422,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         signatureOverlay.appendChild(signatureElement);
         makeDraggable(signatureElement);
-        
+
         const x = signatureElement.offsetLeft / pdfScale;
         const y = signatureElement.offsetTop / pdfScale;
         document.getElementById('signatureX').value = x;
@@ -453,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
             startY = event.clientY;
             initialLeft = element.offsetLeft;
             initialTop = element.offsetTop;
-            
+
             document.addEventListener('mousemove', drag);
             document.addEventListener('mouseup', stopDrag);
             document.addEventListener('touchmove', drag);
@@ -541,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const formData = new FormData();
         formData.append('files', uploadedFile);
-        
+
         let sigDataToSend = '';
         if (signatureData.type === 'text') {
             const tempCanvas = document.createElement('canvas');
@@ -552,8 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const textWidth = tempCtx.measureText(signatureData.text).width;
             tempCanvas.width = Math.max(textWidth + 20, 300);
             tempCanvas.height = 80;
-            tempCtx.fillStyle = 'white';
-            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            tempCtx.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
             tempCtx.fillStyle = signatureData.color;
             tempCtx.font = `${fontSize}px ${fontFamily}`;
             tempCtx.textBaseline = 'middle';
@@ -562,10 +561,10 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             sigDataToSend = signatureData.data;
         }
-        
+
         formData.append('signature', sigDataToSend);
         document.getElementById('signatureData').value = sigDataToSend;
-        
+
         formData.append('x', document.getElementById('signatureX').value);
         formData.append('y', document.getElementById('signatureY').value);
         formData.append('page', document.getElementById('signaturePage').value);
@@ -622,16 +621,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         pageThumbnails.innerHTML = '';
         signatureOverlay.innerHTML = '';
-        
+
         signToolLayout.style.display = 'none';
         resultArea.style.display = 'none';
         errorArea.style.display = 'none';
         initialUpload.style.display = 'block';
-        
+
         fileInput.value = '';
         fullNameInput.value = '';
         initialsInput.value = '';
-        
+
         if (drawCtx) {
             drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
         }

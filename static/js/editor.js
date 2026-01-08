@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const fileInput = document.getElementById('fileInput');
     const browseBtn = document.getElementById('browseBtn');
     const dropzone = document.getElementById('dropzone');
@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentPage = 1;
     let totalPages = 0;
     let uploadedFile = null;
+    let serverFilename = null;
     let pdfScale = 1;
     let baseScale = 1;
     let zoomFactor = 1;
@@ -101,6 +102,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
         await renderPage(1);
         updatePageNavigation();
+
+        // Upload immediately
+        uploadFileToServer(file);
+    }
+
+    async function uploadFileToServer(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                serverFilename = data.filename;
+            } else {
+                console.error("Background upload failed");
+            }
+        } catch (e) { console.error("Upload error", e); }
     }
 
     async function extractTextBlocks(file) {
@@ -193,7 +211,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (editedBlock && editedBlock.modified) {
                 el.classList.add('modified');
-                
+
                 const preview = document.createElement('div');
                 preview.className = 'modified-text-preview';
                 preview.style.position = 'absolute';
@@ -255,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.addEventListener('click', (e) => {
-        if (!e.target.closest('.text-block-overlay') && 
+        if (!e.target.closest('.text-block-overlay') &&
             !e.target.closest('#inlineEditToolbar') &&
             !e.target.closest('.inline-dropdown-menu')) {
             hideInlineToolbar();
@@ -301,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selectedTextBlock) {
                 const font = btn.dataset.font;
                 const existingEdit = editedTextBlocks[selectedTextBlock.id] || selectedTextBlock;
-                
+
                 editedTextBlocks[selectedTextBlock.id] = {
                     ...existingEdit,
                     font_name: font,
@@ -328,7 +346,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (selectedTextBlock) {
                 const color = btn.dataset.color;
                 const existingEdit = editedTextBlocks[selectedTextBlock.id] || selectedTextBlock;
-                
+
                 editedTextBlocks[selectedTextBlock.id] = {
                     ...existingEdit,
                     color: color,
@@ -352,7 +370,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     editorOverlay.addEventListener('dblclick', (e) => {
         if (currentTool !== 'select') return;
-        
+
         const blockEl = e.target.closest('.text-block-overlay');
         if (!blockEl) return;
 
@@ -868,10 +886,34 @@ document.addEventListener('DOMContentLoaded', function() {
         if (file) {
             const reader = new FileReader();
             reader.onload = (ev) => {
-                pendingImageData = ev.target.result;
-                document.getElementById('previewImg').src = pendingImageData;
-                document.getElementById('imagePreview').style.display = 'block';
-                document.getElementById('confirmImage').disabled = false;
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxSize = 1500;
+
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) {
+                            height = Math.round((height * maxSize) / width);
+                            width = maxSize;
+                        } else {
+                            width = Math.round((width * maxSize) / height);
+                            height = maxSize;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    pendingImageData = canvas.toDataURL('image/jpeg', 0.85); // Compress slightly
+                    document.getElementById('previewImg').src = pendingImageData;
+                    document.getElementById('imagePreview').style.display = 'block';
+                    document.getElementById('confirmImage').disabled = false;
+                };
+                img.src = ev.target.result;
             };
             reader.readAsDataURL(file);
         }
@@ -1023,7 +1065,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const formData = new FormData();
-        formData.append('files', uploadedFile);
+        if (serverFilename) {
+            formData.append('server_filename', serverFilename);
+        } else {
+            // Fallback if upload failed or wasn't done
+            formData.append('files', uploadedFile);
+        }
         formData.append('edits', JSON.stringify(edits));
 
         applyChangesBtn.disabled = true;
@@ -1069,6 +1116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentPage = 1;
         totalPages = 0;
         uploadedFile = null;
+        serverFilename = null;
         edits = [];
         undoStack = [];
         pendingClickPos = null;
