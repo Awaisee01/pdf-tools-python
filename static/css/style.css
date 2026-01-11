@@ -64,6 +64,13 @@ body {
     font-weight: 700;
 }
 
+.logo-img {
+    height: 70px;
+    width: auto;
+    object-fit: cover;
+    display: block;
+}
+
 .logo-icon {
     width: 32px;
     height: 32px;
