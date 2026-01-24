@@ -157,6 +157,12 @@ document.addEventListener('DOMContentLoaded', function () {
         pdfCanvas.width = scaledViewport.width;
         pdfCanvas.height = scaledViewport.height;
 
+        // Fix: Also resize the overlay to match the canvas
+        if (signatureOverlay) {
+            signatureOverlay.style.width = scaledViewport.width + 'px';
+            signatureOverlay.style.height = scaledViewport.height + 'px';
+        }
+
         const ctx = pdfCanvas.getContext('2d');
         await page.render({ canvasContext: ctx, viewport: scaledViewport }).promise;
 

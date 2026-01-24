@@ -50,8 +50,11 @@ document.addEventListener('DOMContentLoaded', function () {
     let selectedColor = '#000000';
     let pendingImageData = null;
     let textBlocks = {};
+    let imageBlocks = {};
     let selectedTextBlock = null;
+    let selectedImageBlock = null;
     let editedTextBlocks = {};
+    let editedImageBlocks = {};
 
     browseBtn.addEventListener('click', () => fileInput.click());
     dropzone.addEventListener('click', (e) => {
@@ -87,6 +90,7 @@ document.addEventListener('DOMContentLoaded', function () {
         edits = [];
         undoStack = [];
         textBlocks = {};
+        imageBlocks = {}; // Add this
         editedTextBlocks = {};
         selectedTextBlock = null;
         updateUndoButton();
@@ -136,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (result.success && result.pages) {
                 result.pages.forEach(pageData => {
                     textBlocks[pageData.page] = pageData.text_blocks;
+                    imageBlocks[pageData.page] = pageData.image_blocks; // Add this
                 });
             }
         } catch (error) {
@@ -175,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
         renderEdits();
         if (currentTool === 'select') {
             renderTextBlocks();
+            renderImageBlocks(); // Add this
         }
     }
 
@@ -240,6 +246,33 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function renderImageBlocks() {
+        const existingBlocks = editorOverlay.querySelectorAll('.image-block-overlay');
+        existingBlocks.forEach(el => el.remove());
+
+        const pageBlocks = imageBlocks[currentPage] || [];
+        pageBlocks.forEach((block, index) => {
+            const editedBlock = editedImageBlocks[block.id];
+            if (editedBlock && editedBlock.deleted) return;
+
+            const el = document.createElement('div');
+            el.className = 'image-block-overlay';
+            el.style.left = (block.x * pdfScale) + 'px';
+            el.style.top = (block.y * pdfScale) + 'px';
+            el.style.width = (block.width * pdfScale) + 'px';
+            el.style.height = (block.height * pdfScale) + 'px';
+            el.dataset.blockId = block.id;
+            el.dataset.index = index;
+
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                selectImageBlock(block, el);
+            });
+
+            editorOverlay.appendChild(el);
+        });
+    }
+
     function selectTextBlock(block, element) {
         document.querySelectorAll('.text-block-overlay.selected').forEach(el => {
             el.classList.remove('selected');
@@ -264,16 +297,30 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function selectImageBlock(block, element) {
+        document.querySelectorAll('.image-block-overlay.selected').forEach(el => {
+            el.classList.remove('selected');
+        });
+
+        element.classList.add('selected');
+        selectedImageBlock = block;
+        selectedTextBlock = null; // Clear selected text block
+
+        showInlineToolbar(element, block);
+    }
+
     function hideInlineToolbar() {
         inlineEditToolbar.style.display = 'none';
         selectedTextBlock = null;
-        document.querySelectorAll('.text-block-overlay.selected').forEach(el => {
+        selectedImageBlock = null;
+        document.querySelectorAll('.text-block-overlay.selected, .image-block-overlay.selected').forEach(el => {
             el.classList.remove('selected');
         });
     }
 
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.text-block-overlay') &&
+            !e.target.closest('.image-block-overlay') &&
             !e.target.closest('#inlineEditToolbar') &&
             !e.target.closest('.inline-dropdown-menu')) {
             hideInlineToolbar();
@@ -297,6 +344,22 @@ document.addEventListener('DOMContentLoaded', function () {
             updateUndoButton();
             hideInlineToolbar();
             renderTextBlocks();
+        } else if (selectedImageBlock) {
+            editedImageBlocks[selectedImageBlock.id] = {
+                ...selectedImageBlock,
+                deleted: true
+            };
+
+            edits.push({
+                type: 'delete',
+                page: selectedImageBlock.page,
+                rect: [selectedImageBlock.x, selectedImageBlock.y, selectedImageBlock.width, selectedImageBlock.height],
+                blockId: selectedImageBlock.id
+            });
+
+            updateUndoButton();
+            hideInlineToolbar();
+            renderImageBlocks();
         }
     });
 
@@ -539,7 +602,62 @@ document.addEventListener('DOMContentLoaded', function () {
 
         makeDraggable(wrapper, edit);
 
+        if (edit.type === 'image' || edit.type === 'signature' || edit.type === 'whiteout' || edit.type === 'shape') {
+            makeResizable(wrapper, edit);
+        }
+
         return wrapper;
+    }
+
+    function makeResizable(element, edit) {
+        const handle = document.createElement('div');
+        handle.className = 'resize-handle';
+        element.appendChild(handle);
+
+        let isResizing = false;
+        let originalWidth, originalHeight, originalX, originalY, originalMouseX, originalMouseY;
+
+        handle.addEventListener('mousedown', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            isResizing = true;
+            originalWidth = edit.width || element.offsetWidth / pdfScale;
+            originalHeight = edit.height || element.offsetHeight / pdfScale;
+            originalX = edit.x;
+            originalY = edit.y;
+            originalMouseX = e.pageX;
+            originalMouseY = e.pageY;
+
+            document.addEventListener('mousemove', resize);
+            document.addEventListener('mouseup', stopResize);
+        });
+
+        function resize(e) {
+            if (!isResizing) return;
+            const dx = (e.pageX - originalMouseX) / pdfScale;
+            const dy = (e.pageY - originalMouseY) / pdfScale;
+
+            const newWidth = Math.max(10, originalWidth + dx);
+            const newHeight = Math.max(10, originalHeight + dy);
+
+            edit.width = newWidth;
+            edit.height = newHeight;
+
+            const img = element.querySelector('img');
+            if (img) {
+                img.style.width = (newWidth * pdfScale) + 'px';
+                img.style.height = (newHeight * pdfScale) + 'px';
+            } else {
+                element.style.width = (newWidth * pdfScale) + 'px';
+                element.style.height = (newHeight * pdfScale) + 'px';
+            }
+        }
+
+        function stopResize() {
+            isResizing = false;
+            document.removeEventListener('mousemove', resize);
+            document.removeEventListener('mouseup', stopResize);
+        }
     }
 
     function makeDraggable(element, edit) {
@@ -547,7 +665,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let startX, startY, origX, origY;
 
         element.addEventListener('mousedown', (e) => {
-            if (e.target.classList.contains('edit-remove-btn')) return;
+            if (e.target.classList.contains('edit-remove-btn') || e.target.classList.contains('resize-handle')) return;
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;

@@ -4,6 +4,13 @@ import json
 import base64
 from io import BytesIO
 from PIL import Image
+import re
+
+UNICODE_FONT_PATH = "C:\\Windows\\Fonts\\Nirmala.ttf"
+
+def has_hindi(text):
+    """Check if text contains Hindi (Devanagari) characters."""
+    return any(u'\u0900' <= char <= u'\u097f' for char in text)
 
 def extract_text_blocks(input_path):
     """Extract text lines with their positions from a PDF (one line at a time)."""
@@ -54,11 +61,30 @@ def extract_text_blocks(input_path):
                         })
                         line_idx += 1
             
+            # Extract images positions for deletion
+            image_blocks = []
+            for img_idx, img in enumerate(page.get_images()):
+                xref = img[0]
+                # Get the image placement on the page
+                for info in page.get_image_info():
+                    if info.get("xref") == xref:
+                        bbox = info.get("bbox")
+                        image_blocks.append({
+                            "id": f"img_{page_num}_{img_idx}",
+                            "type": "image",
+                            "x": bbox[0],
+                            "y": bbox[1],
+                            "width": bbox[2] - bbox[0],
+                            "height": bbox[3] - bbox[1],
+                            "page": page_num + 1
+                        })
+            
             pages_data.append({
                 "page": page_num + 1,
                 "width": page.rect.width,
                 "height": page.rect.height,
-                "text_blocks": text_blocks
+                "text_blocks": text_blocks,
+                "image_blocks": image_blocks
             })
         
         pdf.close()
@@ -107,8 +133,12 @@ def edit_pdf(input_path, output_path, edits):
                     
                     if content:
                         text_point = fitz.Point(x, y + font_size)
-                        page.insert_text(text_point, content, fontsize=font_size,
-                                       fontname="helv", color=color)
+                        if has_hindi(content) and os.path.exists(UNICODE_FONT_PATH):
+                             page.insert_text(text_point, content, fontsize=font_size,
+                                           fontfile=UNICODE_FONT_PATH, color=color)
+                        else:
+                             page.insert_text(text_point, content, fontsize=font_size,
+                                           fontname="helv", color=color)
                 
                 elif edit_type in ('image', 'signature'):
                     x = float(edit.get('x', 100))
@@ -172,8 +202,12 @@ def edit_pdf(input_path, output_path, edits):
                     
                     if new_text:
                         text_point = fitz.Point(float(rect[0]), float(rect[1]) + font_size)
-                        page.insert_text(text_point, new_text, fontsize=font_size, 
-                                       fontname=font_name, color=color)
+                        if has_hindi(new_text) and os.path.exists(UNICODE_FONT_PATH):
+                            page.insert_text(text_point, new_text, fontsize=font_size, 
+                                           fontfile=UNICODE_FONT_PATH, color=color)
+                        else:
+                            page.insert_text(text_point, new_text, fontsize=font_size, 
+                                           fontname=font_name, color=color)
                 
                 elif edit_type == 'add':
                     x = float(edit.get('x', 100))
@@ -189,8 +223,12 @@ def edit_pdf(input_path, output_path, edits):
                     
                     if text:
                         text_point = fitz.Point(x, y + font_size)
-                        page.insert_text(text_point, text, fontsize=font_size,
-                                       fontname="helv", color=color)
+                        if has_hindi(text) and os.path.exists(UNICODE_FONT_PATH):
+                            page.insert_text(text_point, text, fontsize=font_size,
+                                           fontfile=UNICODE_FONT_PATH, color=color)
+                        else:
+                            page.insert_text(text_point, text, fontsize=font_size,
+                                           fontname="helv", color=color)
                 
                 elif edit_type == 'delete':
                     rect = edit.get('rect', [0, 0, 100, 20])

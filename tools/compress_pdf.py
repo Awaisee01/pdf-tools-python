@@ -25,9 +25,10 @@ def compress_pdf(input_path, output_path, quality='medium'):
         
         quality_settings = {
             'extreme': {
-                'image_quality': 35,
-                'max_image_width': 1200,
-                'max_image_height': 1200,
+                'image_quality': 10,  # Significantly lower quality
+                'max_image_width': 600,  # Lower resolution
+                'max_image_height': 600,
+                'grayscale': True,  # Add flag for grayscale
                 'garbage': 4,
                 'deflate': True,
                 'deflate_images': True,
@@ -104,7 +105,10 @@ def compress_pdf(input_path, output_path, quality='medium'):
                         image = image.resize((new_width, new_height), Image.LANCZOS)
                         images_downscaled += 1
                     
-                    if image.mode in ('RGBA', 'P', 'LA'):
+                    if settings.get('grayscale'):
+                        image = image.convert('L')
+                    
+                    if image.mode in ('RGBA', 'P', 'LA') and image.mode != 'L':
                         background = Image.new('RGB', image.size, (255, 255, 255))
                         if image.mode == 'P':
                             image = image.convert('RGBA')
@@ -113,7 +117,7 @@ def compress_pdf(input_path, output_path, quality='medium'):
                             image = background
                         else:
                             image = image.convert('RGB')
-                    elif image.mode != 'RGB':
+                    elif image.mode != 'RGB' and image.mode != 'L':
                         image = image.convert('RGB')
                     
                     output_buffer = io.BytesIO()
