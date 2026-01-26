@@ -441,8 +441,25 @@ def process_tool(tool_name):
         if result and result.get('success'):
             if 'output_path' in result:
                 # Ensure the filename sent to frontend is just the basename
-                result['filename'] = os.path.basename(result['output_path'])
+                filename = os.path.basename(result['output_path'])
+                result['filename'] = filename
                 cleanup_file(result['output_path'])
+            
+            if 'files' in result and isinstance(result['files'], list):
+                # Ensure all files in the list are just basenames or relative to their specific structures
+                # For split PDF, they are in a subfolder, so we need the relative path from PROCESSED_FOLDER
+                normalized_files = []
+                for f in result['files']:
+                    # Extract the part of the path relative to PROCESSED_FOLDER
+                    # If f is /tmp/pdf-forge/processed/xyz/page_1.pdf and PROCESSED_FOLDER is /tmp/pdf-forge/processed
+                    # we want xyz/page_1.pdf
+                    try:
+                        rel_path = os.path.relpath(f, PROCESSED_FOLDER)
+                        normalized_files.append(rel_path)
+                    except ValueError:
+                        normalized_files.append(os.path.basename(f))
+                result['files'] = normalized_files
+                
             return jsonify(result)
         else:
             return jsonify({'error': result.get('error', 'Processing failed')}), 500
